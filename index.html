@@ -1,0 +1,437 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Alistair Rodrigues — AI + Data + UX</title>
+<meta name="description" content="Alistair Rodrigues — AI, data and UX engineer. Retrieval systems, agent pipelines, and the interfaces that make them usable.">
+<meta name="theme-color" content="#060910">
+<link rel="stylesheet" href="css/tokens.css">
+<link rel="stylesheet" href="css/desktop.css">
+<link rel="stylesheet" href="css/window.css">
+</head>
+<body class="booting">
+
+<!-- ═══════════ menu bar ═══════════ -->
+<div class="menubar">
+  <button class="mb-item mb-mark" data-menu="m-system" aria-expanded="false" aria-label="System menu">&#9670;</button>
+  <button class="mb-item is-app" data-menu="m-app" aria-expanded="false">Alistair Rodrigues</button>
+  <button class="mb-item mb-hide" data-menu="m-work" aria-expanded="false">Work</button>
+  <button class="mb-item mb-hide" data-menu="m-window" aria-expanded="false">Window</button>
+
+  <div class="mb-right">
+    <svg class="mb-hide" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+      <path d="M2 8.5a15 15 0 0 1 20 0M5 12a10 10 0 0 1 14 0M8.5 15.5a5 5 0 0 1 7 0"/><circle cx="12" cy="19" r="1" fill="currentColor" stroke="none"/>
+    </svg>
+    <svg class="mb-hide" width="26" height="14" viewBox="0 0 26 14" fill="none" aria-hidden="true">
+      <rect x="0.6" y="0.6" width="20" height="12.8" rx="3.6" stroke="currentColor" stroke-opacity=".5"/>
+      <rect x="2.4" y="2.4" width="13" height="9.2" rx="2.2" fill="currentColor"/>
+      <path d="M22.6 5v4a2.6 2.6 0 0 0 0-4Z" fill="currentColor" fill-opacity=".55"/>
+    </svg>
+    <span class="mb-clock"></span>
+  </div>
+</div>
+
+<div class="mb-menu" hidden></div>
+
+<!-- menu contents -->
+<template id="m-system">
+  <button data-action="open:about">About This Portfolio</button>
+  <hr>
+  <button data-action="open:resume">Résumé<kbd>⌘R</kbd></button>
+  <button data-action="open:contact">Get in touch<kbd>⌘K</kbd></button>
+  <hr>
+  <button data-action="closeAll">Close all windows</button>
+</template>
+<template id="m-app">
+  <button data-action="open:about">About Alistair</button>
+  <button data-action="open:terminal">Terminal</button>
+  <hr>
+  <button data-action="link:https://github.com/Alistair77">GitHub ↗</button>
+  <button data-action="link:https://linkedin.com/in/alistair77">LinkedIn ↗</button>
+</template>
+<template id="m-work">
+  <button data-action="open:projects">All projects<kbd>⌘1</kbd></button>
+  <button data-action="open:resume">Experience</button>
+  <hr>
+  <button data-action="open:contact">Start a project</button>
+</template>
+<template id="m-window">
+  <button data-action="open:about">About</button>
+  <button data-action="open:projects">Projects</button>
+  <button data-action="open:terminal">Terminal</button>
+  <button data-action="open:contact">Contact</button>
+  <hr>
+  <button data-action="closeAll">Close all<kbd>⌘⌥W</kbd></button>
+</template>
+
+<!-- ═══════════ desktop ═══════════ -->
+<main class="desktop">
+  <div class="wallpaper" aria-hidden="true">
+    <div class="wall-bloom"></div>
+    <div class="wall-bloom b2"></div>
+    <svg class="wall-arcs" viewBox="0 0 1400 900" preserveAspectRatio="none">
+      <defs>
+        <linearGradient id="arcGrad" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stop-color="#fff" stop-opacity="0"/>
+          <stop offset="42%" stop-color="#C9DCFF" stop-opacity=".50"/>
+          <stop offset="100%" stop-color="#fff" stop-opacity="0"/>
+        </linearGradient>
+        <linearGradient id="arcHot" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stop-color="#9FD4FF" stop-opacity="0"/>
+          <stop offset="50%" stop-color="#EAF4FF" stop-opacity=".95"/>
+          <stop offset="100%" stop-color="#9FD4FF" stop-opacity="0"/>
+        </linearGradient>
+        <g id="arcset">
+          <path id="p1" d="M-60 300 C 300 180, 620 420, 900 330 S 1330 150, 1470 250"/>
+          <path id="p2" d="M-60 380 C 320 250, 640 490, 920 395 S 1340 215, 1470 320"/>
+          <path id="p3" d="M-60 470 C 340 330, 660 570, 940 470 S 1350 290, 1470 400"/>
+          <path id="p4" d="M-60 570 C 360 420, 680 660, 960 555 S 1360 375, 1470 490"/>
+          <path id="p5" d="M-60 690 C 380 530, 700 770, 980 650 S 1370 470, 1470 600"/>
+          <path id="p6" d="M-60 820 C 400 640, 720 880, 1000 760 S 1380 570, 1470 720"/>
+        </g>
+      </defs>
+      <g class="arc-base" fill="none"><use href="#arcset"/></g>
+      <g class="arc-glow" fill="none">
+        <use class="g1" href="#p2"/>
+        <use class="g2" href="#p4"/>
+        <use class="g3" href="#p5"/>
+      </g>
+    </svg>
+    <div class="wall-dust d1"></div>
+    <div class="wall-dust d2"></div>
+    <svg class="wall-grain"><filter id="g"><feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="3"/></filter><rect width="100%" height="100%" filter="url(#g)"/></svg>
+  </div>
+
+  <ul class="desk-icons">
+    <li><button class="desk-icon" data-open="projects">
+      <span class="glyph" style="background:linear-gradient(160deg,#63B3FF,#1668E3)">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="#fff"><path d="M3 6.5A1.5 1.5 0 0 1 4.5 5h4l1.7 2H19.5A1.5 1.5 0 0 1 21 8.5v9A1.5 1.5 0 0 1 19.5 19h-15A1.5 1.5 0 0 1 3 17.5Z"/></svg>
+      </span><span>Projects</span></button></li>
+    <li><button class="desk-icon" data-open="resume">
+      <span class="glyph" style="background:linear-gradient(160deg,#F2F4F8,#C3CAD6)">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="#2A2F3A"><path d="M6 2h7l5 5v15H6z" opacity=".9"/><path d="M8.5 12h7v1.4h-7zm0 3h7v1.4h-7zm0 3h4.6v1.4H8.5z" fill="#fff"/></svg>
+      </span><span>Résumé.pdf</span></button></li>
+    <li><button class="desk-icon" data-open="terminal">
+      <span class="glyph" style="background:linear-gradient(160deg,#33383F,#14171C)">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#7BE8A8" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 7l4 4-4 4M12 16h7"/></svg>
+      </span><span>Terminal</span></button></li>
+  </ul>
+
+  <div id="windows"></div>
+</main>
+
+<!-- ═══════════ dock ═══════════ -->
+<nav class="dock" aria-label="Dock">
+  <button class="dock-item" data-app="about" data-tip="About" aria-label="About">
+    <span class="glyph" style="background:linear-gradient(160deg,#59D0FF,#1478E8)">
+      <svg viewBox="0 0 24 24" fill="#fff"><circle cx="12" cy="8.4" r="3.9"/><path d="M4.2 20.4a7.8 7.8 0 0 1 15.6 0z"/></svg>
+    </span>
+  </button>
+  <button class="dock-item" data-app="projects" data-tip="Projects" aria-label="Projects">
+    <span class="glyph" style="background:linear-gradient(160deg,#63B3FF,#1668E3)">
+      <svg viewBox="0 0 24 24" fill="#fff"><path d="M3 6.5A1.5 1.5 0 0 1 4.5 5h4l1.7 2H19.5A1.5 1.5 0 0 1 21 8.5v9A1.5 1.5 0 0 1 19.5 19h-15A1.5 1.5 0 0 1 3 17.5Z"/></svg>
+    </span>
+  </button>
+  <button class="dock-item" data-app="resume" data-tip="Résumé" aria-label="Résumé">
+    <span class="glyph" style="background:linear-gradient(160deg,#FFD36B,#F0A310)">
+      <svg viewBox="0 0 24 24" fill="#4A3200"><path d="M6 2h7l5 5v15H6z" opacity=".85"/><path d="M8.5 12h7v1.5h-7zm0 3h7v1.5h-7zm0 3h4.6v1.5H8.5z" fill="#FFF6DF"/></svg>
+    </span>
+  </button>
+  <button class="dock-item" data-app="terminal" data-tip="Terminal" aria-label="Terminal">
+    <span class="glyph" style="background:linear-gradient(160deg,#3A3F47,#15181D)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#7BE8A8" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 7l4 4-4 4M12 16h7"/></svg>
+    </span>
+  </button>
+  <button class="dock-item" data-app="contact" data-tip="Contact" aria-label="Contact">
+    <span class="glyph" style="background:linear-gradient(160deg,#6FE09A,#12A85C)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.9" stroke-linejoin="round"><rect x="3" y="5.5" width="18" height="13" rx="2.4"/><path d="m3.8 7 8.2 6 8.2-6"/></svg>
+    </span>
+  </button>
+  <span class="dock-sep"></span>
+  <a class="dock-item" href="https://github.com/Alistair77" target="_blank" rel="noopener" data-tip="GitHub" aria-label="GitHub">
+    <span class="glyph" style="background:linear-gradient(160deg,#4A4F57,#1B1E23)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 7 4 12l4.5 5M15.5 7 20 12l-4.5 5"/></svg>
+    </span>
+  </a>
+</nav>
+
+<!-- ═══════════ app windows ═══════════ -->
+
+<template data-app="about" data-title="About" data-width="860" data-height="540">
+  <nav class="sidebar">
+    <div class="sb-label">Alistair Rodrigues</div>
+    <button class="sb-item" data-pane="intro" aria-selected="true">Overview</button>
+    <button class="sb-item" data-pane="how">How I work</button>
+    <button class="sb-item" data-pane="stack">Toolkit</button>
+    <div class="sb-label">Status</div>
+    <button class="sb-item" data-pane="now">Now</button>
+  </nav>
+  <div class="content">
+    <section class="pane" data-pane="intro">
+      <p class="eyebrow">AI · Data · UX Engineer</p>
+      <h1>I build AI that ships.</h1>
+      <p class="lede">Retrieval systems, agent pipelines, on-device models — and the interfaces that make them usable. The model is only half the product; the other half is whether anyone can actually drive it.</p>
+      <p>MSc Advanced Computer Science at <strong>Strathclyde</strong>. I work across the whole path: the retrieval layer, the evaluation harness that proves it works, and the front end people actually touch.</p>
+      <div class="stats">
+        <div class="stat"><b>6</b><span>Shipped projects</span></div>
+        <div class="stat"><b>MSc</b><span>Adv. Computer Science</span></div>
+        <div class="stat"><b>AI + Web</b><span>Both ends of the stack</span></div>
+      </div>
+      <div class="btn-row">
+        <button class="btn primary" data-open="projects">See the work</button>
+        <button class="btn" data-open="contact">Get in touch</button>
+      </div>
+    </section>
+
+    <section class="pane" data-pane="how" hidden>
+      <p class="eyebrow">Approach</p>
+      <h1>How I work</h1>
+      <h2>Measure before you claim</h2>
+      <p>Every AI system I build ships with an evaluation harness. A rubric, persisted runs, and a dashboard that catches regressions — otherwise "it got better" is just a feeling.</p>
+      <h2>Retrieval beats a bigger prompt</h2>
+      <p>Hybrid search, proper reranking, deterministic chunk IDs. Most "the model is wrong" problems are retrieval problems wearing a costume.</p>
+      <h2>Keep a human in the loop</h2>
+      <p>Agents should pause before high-impact actions. Resumable state and step-level tracing mean you can replay exactly what happened instead of guessing.</p>
+      <h2>The interface is the product</h2>
+      <p>A retrieval system nobody can steer is a research demo. I build the front end with the same care as the pipeline behind it.</p>
+    </section>
+
+    <section class="pane" data-pane="stack" hidden>
+      <p class="eyebrow">Toolkit</p>
+      <h1>Things I reach for</h1>
+      <h2>AI &amp; data</h2>
+      <div class="tags"><span class="tag">Python</span><span class="tag">LangGraph</span><span class="tag">Claude</span><span class="tag">Pinecone</span><span class="tag">BM25</span><span class="tag">Cohere</span><span class="tag">Ollama</span><span class="tag">DuckDB</span></div>
+      <h2>Backend</h2>
+      <div class="tags"><span class="tag">FastAPI</span><span class="tag">Pydantic</span><span class="tag">Kotlin</span><span class="tag">Streamlit</span><span class="tag">Unit testing</span></div>
+      <h2>Front end &amp; 3D</h2>
+      <div class="tags"><span class="tag">React</span><span class="tag">Three.js</span><span class="tag">GLSL</span><span class="tag">WebGL</span><span class="tag">GSAP</span><span class="tag">Ant Design</span><span class="tag">Vanilla JS</span></div>
+    </section>
+
+    <section class="pane" data-pane="now" hidden>
+      <p class="eyebrow">Currently</p>
+      <h1>Now</h1>
+      <p>Building agent tooling — orchestration with human checkpoints, and the evaluation pipeline that keeps it honest.</p>
+      <p>Finishing an MSc in Advanced Computer Science at Strathclyde.</p>
+      <p>Open to roles and collaborations in AI engineering. If it involves retrieval, agents, or making a model usable by people who didn't build it, I'm interested.</p>
+      <div class="btn-row"><button class="btn primary" data-open="contact">Start a conversation</button></div>
+    </section>
+  </div>
+</template>
+
+<template data-app="projects" data-title="Projects" data-width="900" data-height="570">
+  <nav class="sidebar">
+    <div class="sb-label">Library</div>
+    <button class="sb-item" data-pane="all" aria-selected="true">All work</button>
+    <div class="sb-label">AI Engineering</div>
+    <button class="sb-item" data-pane="ragstar">RAGStar</button>
+    <button class="sb-item" data-pane="orchestrator">Agent Orchestrator</button>
+    <button class="sb-item" data-pane="evals">Agent Evals</button>
+    <div class="sb-label">Web / Frontend</div>
+    <button class="sb-item" data-pane="hawkai">HawkAI</button>
+    <button class="sb-item" data-pane="quanta">Quantasphere</button>
+    <button class="sb-item" data-pane="cosmos">Cosmos Portfolio</button>
+  </nav>
+  <div class="content">
+    <section class="pane" data-pane="all">
+      <p class="eyebrow">Selected work</p>
+      <h1>Projects</h1>
+      <p>Six that show the range — retrieval and agent systems on one side, real-time 3D interfaces on the other. Click one for the detail.</p>
+      <div class="rows">
+        <button class="row" data-pane="ragstar">
+          <span class="dot" style="background:linear-gradient(160deg,#7C5CFF,#3B22B8)"></span>
+          <span><h3>RAGStar</h3><p>Hybrid search RAG — vector + BM25, fused and reranked</p></span>
+          <span class="meta">2026</span>
+        </button>
+        <button class="row" data-pane="orchestrator">
+          <span class="dot" style="background:linear-gradient(160deg,#5AD1C8,#0E8C88)"></span>
+          <span><h3>Agent Orchestrator</h3><p>Plan → Act → Reflect loop with human checkpoints</p></span>
+          <span class="meta">2026</span>
+        </button>
+        <button class="row" data-pane="evals">
+          <span class="dot" style="background:linear-gradient(160deg,#FFB25C,#E0731A)"></span>
+          <span><h3>Agent Evals</h3><p>LLM evaluation pipeline — judge, persist, catch regressions</p></span>
+          <span class="meta">2026</span>
+        </button>
+        <button class="row" data-pane="hawkai">
+          <span class="dot" style="background:linear-gradient(160deg,#FF7A9C,#D2295C)"></span>
+          <span><h3>HawkAI</h3><p>3D authentication UI — Three.js, custom GLSL, particles</p></span>
+          <span class="meta">2026</span>
+        </button>
+        <button class="row" data-pane="quanta">
+          <span class="dot" style="background:linear-gradient(160deg,#63B3FF,#1668E3)"></span>
+          <span><h3>Quantasphere</h3><p>Interactive hero — mouse-scrubbed video, zero frameworks</p></span>
+          <span class="meta">2026</span>
+        </button>
+        <button class="row" data-pane="cosmos">
+          <span class="dot" style="background:linear-gradient(160deg,#9AA6FF,#4B52D6)"></span>
+          <span><h3>Cosmos Portfolio System</h3><p>3D satellite scene, scroll timeline, WebGL starfield</p></span>
+          <span class="meta">2026 —</span>
+        </button>
+      </div>
+      <h2>Also in progress</h2>
+      <p>Study Snippets, Health Weight, and a running set of experiments.</p>
+    </section>
+
+    <section class="pane" data-pane="ragstar" hidden>
+      <p class="eyebrow">2026 · AI Engineering</p>
+      <h1>RAGStar</h1>
+      <p class="lede">A hybrid retrieval pipeline that answers from your documents and cites them — running a local model, so nothing leaves the machine.</p>
+      <h2>Retrieval</h2>
+      <p>Pinecone vector search and BM25 keyword search run side by side, merged with <strong>Reciprocal Rank Fusion</strong> at a k=60 smoothing constant. Dense search alone misses exact terms; sparse alone misses meaning. Fusing them covers both.</p>
+      <h2>Precision</h2>
+      <p>A Cohere cross-encoder reranks the top 20 candidates before anything reaches the model, so the context window carries signal rather than volume. Generation runs on a local <strong>Ollama</strong> model — private, and grounded in citations.</p>
+      <h2>Engineering</h2>
+      <p>FastAPI service with Pydantic validation at the boundary. Chunk IDs are deterministic MD5 hashes, so re-ingesting a document updates it instead of silently duplicating it. Covered by unit tests.</p>
+      <div class="tags"><span class="tag">Python</span><span class="tag">FastAPI</span><span class="tag">Pinecone</span><span class="tag">BM25</span><span class="tag">Cohere</span><span class="tag">Ollama</span><span class="tag">Pydantic</span></div>
+      <div class="btn-row"><a class="btn primary" href="https://github.com/Alistair77/ragstar" target="_blank" rel="noopener">View repository</a></div>
+    </section>
+
+    <section class="pane" data-pane="orchestrator" hidden>
+      <p class="eyebrow">2026 · AI Engineering</p>
+      <h1>Agent Orchestrator</h1>
+      <p class="lede">A multi-step agent that decomposes a task, runs tools, and critiques its own work before deciding what to do next.</p>
+      <h2>The loop</h2>
+      <p><strong>Plan → Act → Reflect.</strong> The agent breaks the task down, executes, then self-critiques each step before choosing the next move — so a bad step gets caught at the step, not at the end of the run.</p>
+      <h2>Human in the loop</h2>
+      <p>Built on LangGraph over Claude, with checkpoints that pause and wait for approval before high-impact actions. Autonomy where it's cheap, a human where it isn't.</p>
+      <h2>Debuggability</h2>
+      <p>Run state is structured and resumable, with step-level tracing. You can replay a run deterministically instead of reconstructing what the agent was thinking.</p>
+      <div class="tags"><span class="tag">Python</span><span class="tag">LangGraph</span><span class="tag">Claude</span><span class="tag">Tool use</span><span class="tag">Tracing</span></div>
+      <div class="btn-row"><a class="btn primary" href="https://github.com/Alistair77/agent-orchestrator" target="_blank" rel="noopener">View repository</a></div>
+    </section>
+
+    <section class="pane" data-pane="evals" hidden>
+      <p class="eyebrow">2026 · AI Engineering</p>
+      <h1>Agent Evals</h1>
+      <p class="lede">An evaluation pipeline for LLM output — because "it seems better now" is not a metric.</p>
+      <h2>Scoring</h2>
+      <p>Synthetic eval datasets generated per task, scored with a <strong>Claude-as-judge</strong> rubric so grading stays consistent and — more usefully — explainable. A failed case tells you why it failed.</p>
+      <h2>Storage</h2>
+      <p>Every run and metric lands in DuckDB, which makes slicing across prompts, models and versions fast enough to actually do it.</p>
+      <h2>Inspection</h2>
+      <p>A Streamlit dashboard to read failures, compare runs side by side, and catch quality regressions before they ship.</p>
+      <div class="tags"><span class="tag">Python</span><span class="tag">Claude-as-judge</span><span class="tag">DuckDB</span><span class="tag">Streamlit</span><span class="tag">Evals</span></div>
+      <div class="btn-row"><a class="btn primary" href="https://github.com/Alistair77/agent-evals" target="_blank" rel="noopener">View repository</a></div>
+    </section>
+
+    <section class="pane" data-pane="hawkai" hidden>
+      <p class="eyebrow">2026 · Frontend Engineering</p>
+      <h1>HawkAI</h1>
+      <p class="lede">A 3D authentication screen — a login page that earns the attention it takes.</p>
+      <h2>The scene</h2>
+      <p>A Draco-compressed GLB security camera model in Three.js, tracking the cursor in real time with genuine depth response rather than a flat parallax trick.</p>
+      <h2>Shaders and atmosphere</h2>
+      <p>Custom <strong>GLSL</strong> shaders drive animated data-flow ribbons, with a particle system of 600+ floating dust points for depth. Cinematic without tipping into noise.</p>
+      <h2>Composition</h2>
+      <p>The WebGL layer renders transparent and composites under an Ant Design form, so the 3D is atmosphere and the form stays a real, accessible form. Rendering adapts to the viewport rather than shipping one heavy scene to every device.</p>
+      <div class="tags"><span class="tag">React</span><span class="tag">Three.js</span><span class="tag">GLSL</span><span class="tag">Ant Design</span><span class="tag">WebGL</span></div>
+      <div class="btn-row"><a class="btn" href="https://github.com/Alistair77" target="_blank" rel="noopener">GitHub profile</a></div>
+    </section>
+
+    <section class="pane" data-pane="quanta" hidden>
+      <p class="eyebrow">2026 · Creative Development</p>
+      <h1>Quantasphere</h1>
+      <p class="lede">A full-viewport hero where moving the mouse scrubs the video. No framework, no build step.</p>
+      <h2>Interaction</h2>
+      <p>Cursor X position maps directly to the video playhead, so the viewer controls the pace of the story instead of watching it happen at them.</p>
+      <h2>Blending</h2>
+      <p>CSS <code>mask-image</code> gradients dissolve the video into the page background, with frosted-glass navigation over the top via <code>backdrop-filter</code>.</p>
+      <h2>Discipline</h2>
+      <p>Respects <code>prefers-reduced-motion</code>, and ships as plain HTML, CSS and JavaScript — zero dependencies, zero tooling.</p>
+      <div class="tags"><span class="tag">Vanilla JS</span><span class="tag">CSS masks</span><span class="tag">Video engineering</span><span class="tag">Accessibility</span></div>
+      <div class="btn-row"><a class="btn" href="https://github.com/Alistair77" target="_blank" rel="noopener">GitHub profile</a></div>
+    </section>
+
+    <section class="pane" data-pane="cosmos" hidden>
+      <p class="eyebrow">2026 — present · Full-stack</p>
+      <h1>Cosmos Portfolio System</h1>
+      <p class="lede">A single-page portfolio built as a motion and 3D exercise — and a stress test for how much you can ship without it feeling heavy.</p>
+      <h2>3D</h2>
+      <p>Three.js satellite rendering with a custom GLB model on a real-time animation loop, plus a WebGL starfield with parallax mouse tracking.</p>
+      <h2>Motion</h2>
+      <p>A modular project showcase with staggered card reveals, and a scroll-driven timeline built on IntersectionObserver and Lenis.</p>
+      <h2>Detail</h2>
+      <p>Live UTC clock and multi-layer video playback with lazy loading, so the atmosphere doesn't cost the first paint.</p>
+      <div class="tags"><span class="tag">Three.js</span><span class="tag">WebGL</span><span class="tag">GSAP</span><span class="tag">Lenis</span><span class="tag">IntersectionObserver</span></div>
+    </section>
+  </div>
+</template>
+
+<template data-app="resume" data-title="Résumé.pdf" data-width="760" data-height="580">
+  <div class="content">
+    <p class="eyebrow">Curriculum vitae</p>
+    <h1>Alistair Rodrigues</h1>
+    <p class="lede">AI · Data · UX Engineer — <a href="mailto:alistairar7@gmail.com">alistairar7@gmail.com</a></p>
+    <hr class="rule">
+    <h2>Education</h2>
+    <ul class="tl-list">
+      <li><h3>MSc Advanced Computer Science</h3><span class="when">University of Strathclyde</span>
+        <p>Focus on applied AI — retrieval systems, agent architectures and evaluation.</p></li>
+    </ul>
+    <h2>Selected projects</h2>
+    <ul class="tl-list">
+      <li><h3>RAGStar — Hybrid Search RAG</h3><span class="when">2026</span>
+        <p>Pinecone + BM25 fused with Reciprocal Rank Fusion, Cohere reranking, local Ollama generation behind a tested FastAPI service.</p></li>
+      <li><h3>Agent Orchestrator</h3><span class="when">2026</span>
+        <p>Plan/Act/Reflect agent loop on LangGraph and Claude, with human-in-the-loop approval and resumable, traceable run state.</p></li>
+      <li><h3>Agent Evals</h3><span class="when">2026</span>
+        <p>Claude-as-judge scoring over synthetic datasets, persisted in DuckDB, inspected through a Streamlit regression dashboard.</p></li>
+      <li><h3>HawkAI — 3D Authentication UI</h3><span class="when">2026</span>
+        <p>Three.js scene with custom GLSL shaders and a 600+ point particle system, composited under an Ant Design form.</p></li>
+      <li><h3>Quantasphere — Interactive Hero</h3><span class="when">2026</span>
+        <p>Mouse-driven video scrubbing and CSS mask blending, built with no frameworks or build tooling.</p></li>
+    </ul>
+    <h2>Skills</h2>
+    <div class="tags"><span class="tag">Python</span><span class="tag">Kotlin</span><span class="tag">FastAPI</span><span class="tag">React</span><span class="tag">AI/ML</span><span class="tag">Three.js</span><span class="tag">GLSL</span><span class="tag">LangGraph</span><span class="tag">DuckDB</span><span class="tag">Pinecone</span></div>
+    <div class="btn-row">
+      <a class="btn primary" href="https://alistair77.github.io/comos_Alistair_portfolio/uploads/resume.pdf" target="_blank" rel="noopener">Open full PDF</a>
+      <button class="btn" data-open="contact">Get in touch</button>
+    </div>
+  </div>
+</template>
+
+<template data-app="terminal" data-title="alistair — zsh — 80×24" data-width="680" data-height="400">
+  <pre class="terminal"><span class="u">alistair@cosmos</span>:<span class="p">~</span>$ whoami
+AI · Data · UX engineer. I build AI that ships.
+
+<span class="u">alistair@cosmos</span>:<span class="p">~</span>$ cat principles.txt
+<span class="c"># the short version</span>
+1. Retrieval problems wear a "the model is wrong" costume.
+2. If you can't measure it, you didn't improve it.
+3. Keep a human in front of the expensive actions.
+4. A pipeline nobody can steer is a demo, not a product.
+5. Ship it, then instrument it.
+
+<span class="u">alistair@cosmos</span>:<span class="p">~</span>$ ls ~/work
+ragstar/  agent-orchestrator/  agent-evals/
+hawkai/   quantasphere/        cosmos-portfolio/
+
+<span class="u">alistair@cosmos</span>:<span class="p">~</span>$ echo $EMAIL
+alistairar7@gmail.com
+
+<span class="u">alistair@cosmos</span>:<span class="p">~</span>$ <span class="caret"></span></pre>
+</template>
+
+<template data-app="contact" data-title="New Message" data-width="620" data-height="440">
+  <div class="content">
+    <p class="eyebrow">Say hello</p>
+    <h1>Let's talk.</h1>
+    <p class="lede">Roles, collaborations, or a hard retrieval problem you can't stop thinking about — all welcome.</p>
+    <hr class="rule">
+    <h2>Email</h2>
+    <p><a href="mailto:alistairar7@gmail.com">alistairar7@gmail.com</a></p>
+    <h2>Elsewhere</h2>
+    <p><a href="https://github.com/Alistair77" target="_blank" rel="noopener">GitHub</a> · <a href="https://linkedin.com/in/alistair77" target="_blank" rel="noopener">LinkedIn</a></p>
+    <h2>Currently</h2>
+    <p>Finishing an MSc in Advanced Computer Science at Strathclyde, and building agent tooling in the meantime. Open to AI engineering roles.</p>
+    <div class="btn-row">
+      <a class="btn primary" href="mailto:alistairar7@gmail.com">Compose email</a>
+      <button class="btn" data-open="resume">View résumé</button>
+    </div>
+  </div>
+</template>
+
+<script type="module" src="js/desktop.js"></script>
+</body>
+</html>

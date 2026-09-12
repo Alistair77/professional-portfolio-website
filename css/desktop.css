@@ -1,0 +1,388 @@
+/* Desktop surface: wallpaper, menu bar, desktop icons, dock. */
+
+.desktop {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  background: #060910;
+}
+
+/* ---------- wallpaper ---------- */
+/* Four independent motions keep it breathing: a drifting bloom, a slow
+   field rotation, light travelling along the arcs, and parallax dust. */
+.wallpaper { position: absolute; inset: 0; pointer-events: none; }
+
+/* base field — deep, but never flat black */
+.wallpaper::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(120% 82% at 50% -14%, #2A2F6B 0%, #161a40 34%, #0B0E20 66%, #070915 100%),
+    linear-gradient(180deg, #0C1030 0%, #070A16 100%);
+}
+
+/* the bloom — slow breathe so the scene is never perfectly still */
+.wall-bloom {
+  position: absolute;
+  inset: -34%;
+  background:
+    radial-gradient(38% 30% at 46% 8%, rgba(132, 112, 255, 0.58), transparent 68%),
+    radial-gradient(34% 28% at 76% 24%, rgba(72, 126, 240, 0.36), transparent 70%),
+    radial-gradient(40% 32% at 16% 42%, rgba(46, 132, 190, 0.28), transparent 72%),
+    radial-gradient(46% 34% at 58% 104%, rgba(58, 74, 196, 0.34), transparent 70%);
+  filter: blur(26px);
+  animation: bloomBreathe 26s ease-in-out infinite alternate;
+  will-change: transform, opacity;
+}
+
+@keyframes bloomBreathe {
+  from { transform: scale(1) translate3d(0, 0, 0); opacity: 0.88; }
+  to   { transform: scale(1.09) translate3d(1.8%, -1.4%, 0); opacity: 1; }
+}
+
+/* a second, offset bloom drifting the other way — the crossing of the two
+   is what stops the glow reading as a static gradient */
+.wall-bloom.b2 {
+  background:
+    radial-gradient(30% 24% at 28% 18%, rgba(88, 196, 224, 0.26), transparent 70%),
+    radial-gradient(32% 26% at 84% 68%, rgba(150, 96, 220, 0.24), transparent 72%);
+  animation: bloomDrift 34s ease-in-out infinite alternate;
+  mix-blend-mode: screen;
+}
+
+@keyframes bloomDrift {
+  from { transform: translate3d(-2.4%, 1.6%, 0) scale(1.04); opacity: 0.6; }
+  to   { transform: translate3d(2.6%, -1.8%, 0) scale(1.12); opacity: 0.95; }
+}
+
+.wall-arcs {
+  position: absolute;
+  inset: -10% -5%;
+  width: 110%;
+  height: 120%;
+  animation: arcDrift 52s ease-in-out infinite alternate;
+  will-change: transform;
+}
+
+@keyframes arcDrift {
+  from { transform: translate3d(0, 0, 0) scale(1) rotate(0deg); }
+  to   { transform: translate3d(-1.8%, 1.4%, 0) scale(1.04) rotate(0.6deg); }
+}
+
+/* stroke must sit on the <use> itself — CSS cannot select into its shadow
+   tree, but inheritable properties like stroke pass through. */
+.arc-base use { stroke: url(#arcGrad); stroke-width: 1.25; }
+
+/* light running along the curves */
+.arc-glow use {
+  stroke: url(#arcHot);
+  stroke-width: 1.7;
+  stroke-dasharray: 240 1700;
+  animation: arcTravel linear infinite;
+}
+
+.arc-glow .g1 { animation-duration: 15s; animation-delay: -2s; }
+.arc-glow .g2 { animation-duration: 21s; animation-delay: -9s; }
+.arc-glow .g3 { animation-duration: 18s; animation-delay: -14s; }
+
+@keyframes arcTravel {
+  from { stroke-dashoffset: 1940; }
+  to   { stroke-dashoffset: 0; }
+}
+
+/* parallax dust — two layers at different speeds reads as depth */
+.wall-dust {
+  position: absolute;
+  inset: -50%;
+  background-repeat: repeat;
+  animation: dustDrift linear infinite;
+  will-change: transform;
+}
+
+.wall-dust.d1 {
+  background-image:
+    radial-gradient(1.4px 1.4px at 18% 22%, rgba(255, 255, 255, 0.55), transparent),
+    radial-gradient(1.2px 1.2px at 62% 14%, rgba(200, 220, 255, 0.45), transparent),
+    radial-gradient(1.5px 1.5px at 84% 58%, rgba(255, 255, 255, 0.40), transparent),
+    radial-gradient(1.1px 1.1px at 34% 74%, rgba(210, 225, 255, 0.42), transparent),
+    radial-gradient(1.3px 1.3px at 72% 88%, rgba(255, 255, 255, 0.34), transparent);
+  background-size: 420px 420px;
+  animation-duration: 150s;
+  opacity: 0.7;
+}
+
+.wall-dust.d2 {
+  background-image:
+    radial-gradient(1px 1px at 12% 44%, rgba(255, 255, 255, 0.34), transparent),
+    radial-gradient(1px 1px at 48% 66%, rgba(190, 215, 255, 0.30), transparent),
+    radial-gradient(1px 1px at 90% 30%, rgba(255, 255, 255, 0.28), transparent);
+  background-size: 300px 300px;
+  animation-duration: 240s;
+  animation-direction: reverse;
+  opacity: 0.5;
+}
+
+@keyframes dustDrift {
+  from { transform: translate3d(0, 0, 0); }
+  to   { transform: translate3d(-420px, -260px, 0); }
+}
+
+/* film grain keeps the gradients from banding on wide gamut displays */
+.wall-grain {
+  position: absolute;
+  inset: 0;
+  opacity: 0.16;
+  mix-blend-mode: overlay;
+}
+
+/* ---------- menu bar ---------- */
+.menubar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: var(--menubar-h);
+  z-index: 900;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 0 10px;
+  font-size: var(--text-sm);
+  color: rgba(255, 255, 255, 0.92);
+  background: rgba(16, 18, 26, 0.34);
+  backdrop-filter: var(--blur-chrome);
+  -webkit-backdrop-filter: var(--blur-chrome);
+  box-shadow: inset 0 -1px 0 rgba(255, 255, 255, 0.07);
+}
+
+.mb-item {
+  appearance: none;
+  background: none;
+  border: 0;
+  padding: 3px 10px;
+  border-radius: 6px;
+  cursor: default;
+  white-space: nowrap;
+  transition: background var(--dur-fast) var(--ease);
+}
+
+.mb-item:hover,
+.mb-item[aria-expanded="true"] { background: rgba(255, 255, 255, 0.16); }
+.mb-item.is-app { font-weight: 600; }
+.mb-mark { font-size: 15px; line-height: 1; padding: 3px 9px; }
+
+.mb-right {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding-right: 4px;
+}
+
+.mb-right svg { display: block; opacity: 0.9; }
+
+.mb-clock {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0;
+  min-width: 132px;
+  text-align: right;
+}
+
+/* dropdown menus */
+.mb-menu {
+  position: fixed;
+  top: calc(var(--menubar-h) - 3px);
+  z-index: 950;
+  min-width: 226px;
+  padding: 5px;
+  border-radius: var(--radius-pop);
+  background: var(--sheet);
+  backdrop-filter: var(--blur-chrome);
+  -webkit-backdrop-filter: var(--blur-chrome);
+  border: 1px solid var(--hair-strong);
+  box-shadow: var(--shadow-pop);
+  animation: popIn var(--dur-fast) var(--ease) both;
+}
+
+.mb-menu[hidden] { display: none; }
+
+.mb-menu button {
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+  width: 100%;
+  padding: 5px 9px;
+  border: 0;
+  border-radius: 6px;
+  background: none;
+  text-align: left;
+  cursor: default;
+}
+
+.mb-menu button:hover { background: var(--accent); color: #fff; }
+.mb-menu button kbd { font: inherit; color: var(--muted-2); }
+.mb-menu button:hover kbd { color: rgba(255, 255, 255, 0.75); }
+.mb-menu hr { margin: 5px 8px; border: 0; border-top: 1px solid var(--hair); }
+
+@keyframes popIn {
+  from { opacity: 0; transform: translateY(-5px) scale(0.985); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* ---------- desktop icons ---------- */
+.desk-icons {
+  position: absolute;
+  top: calc(var(--menubar-h) + 14px);
+  right: 14px;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.desk-icon {
+  display: grid;
+  justify-items: center;
+  gap: 5px;
+  width: 88px;
+  padding: 7px 4px 5px;
+  border: 0;
+  border-radius: 9px;
+  background: none;
+  cursor: default;
+  transition: background var(--dur-fast) var(--ease);
+}
+
+.desk-icon:hover { background: rgba(255, 255, 255, 0.10); }
+.desk-icon:active { background: rgba(255, 255, 255, 0.16); }
+
+.desk-icon .glyph {
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  border-radius: 11px;
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.42), inset 0 1px 0 rgba(255, 255, 255, 0.22);
+}
+
+.desk-icon span {
+  font-size: var(--text-xs);
+  line-height: 1.25;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.75);
+}
+
+/* ---------- dock ---------- */
+.dock {
+  position: fixed;
+  left: 50%;
+  bottom: 10px;
+  z-index: 800;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  padding: 7px 12px 11px;
+  border-radius: 22px;
+  background: rgba(58, 60, 72, 0.32);
+  backdrop-filter: blur(36px) saturate(185%);
+  -webkit-backdrop-filter: blur(36px) saturate(185%);
+  border: 1px solid var(--hair-strong);
+  box-shadow: var(--shadow-dock);
+}
+
+.dock-item {
+  position: relative;
+  width: var(--dock-icon);
+  height: var(--dock-icon);
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: default;
+  flex: 0 0 auto;
+  transform-origin: 50% 100%;
+  transition: transform 120ms var(--ease-snap);
+}
+
+.dock-item .glyph {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  border-radius: 23%;
+  box-shadow: 0 7px 16px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.24);
+}
+
+.dock-item .glyph svg { width: 56%; height: 56%; }
+
+/* running indicator */
+.dock-item::before {
+  content: "";
+  position: absolute;
+  bottom: -7px;
+  left: 50%;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.72);
+  transform: translateX(-50%) scale(0);
+  transition: transform var(--dur-fast) var(--ease);
+}
+
+.dock-item.running::before { transform: translateX(-50%) scale(1); }
+
+/* tooltip */
+.dock-item::after {
+  content: attr(data-tip);
+  position: absolute;
+  bottom: calc(100% + 16px);
+  left: 50%;
+  padding: 4px 10px;
+  border-radius: 8px;
+  font-size: var(--text-sm);
+  white-space: nowrap;
+  background: rgba(30, 32, 38, 0.94);
+  border: 1px solid var(--hair-strong);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.45);
+  opacity: 0;
+  transform: translateX(-50%) translateY(6px);
+  transition: opacity var(--dur-fast) var(--ease), transform var(--dur-fast) var(--ease);
+  pointer-events: none;
+}
+
+.dock-item:hover::after,
+.dock-item:focus-visible::after { opacity: 1; transform: translateX(-50%); }
+
+.dock-item.bouncing { animation: dockBounce 620ms var(--ease) 2; }
+
+@keyframes dockBounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-22px); }
+}
+
+.dock-sep {
+  width: 1px;
+  height: 42px;
+  margin: 0 2px;
+  align-self: center;
+  background: var(--hair-strong);
+}
+
+/* ---------- boot ---------- */
+body.booting .menubar,
+body.booting .dock,
+body.booting .desk-icons { opacity: 0; }
+
+.menubar, .dock, .desk-icons {
+  transition: opacity 700ms var(--ease);
+}
+
+@media (max-width: 760px) {
+  .desk-icons { display: none; }
+  .dock { gap: 6px; padding: 6px 9px 10px; --dock-icon: 46px; }
+  .mb-hide { display: none; }
+  .mb-clock { min-width: 0; }
+}
