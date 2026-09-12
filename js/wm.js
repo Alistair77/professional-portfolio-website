@@ -57,7 +57,11 @@ export function closeApp(id) {
   const el = open.get(id);
   if (!el) return;
   el.classList.add("closing");
-  el.addEventListener("animationend", () => el.remove(), { once: true });
+  /* animationend can fail to fire (background tab, interrupted animation),
+     which would leave the element orphaned in the DOM — so time it out too. */
+  const drop = () => el.remove();
+  el.addEventListener("animationend", drop, { once: true });
+  setTimeout(drop, 400);
   open.delete(id);
   document.dispatchEvent(new CustomEvent("app:close", { detail: id }));
 }

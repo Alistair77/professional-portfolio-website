@@ -62,8 +62,11 @@ const syncDock = () => {
 ["app:open", "app:close"].forEach((ev) => document.addEventListener(ev, syncDock));
 
 /* ---------- desktop icons ---------- */
-document.querySelectorAll("[data-open]").forEach((el) => {
-  el.addEventListener("click", () => openApp(el.dataset.open));
+/* Delegated: window content is cloned from <template> when a window opens,
+   so binding directly at load time would miss every in-window button. */
+document.addEventListener("click", (e) => {
+  const el = e.target.closest("[data-open]");
+  if (el) openApp(el.dataset.open);
 });
 
 /* ---------- menu bar dropdowns ---------- */

@@ -28,14 +28,24 @@ addEventListener("keydown", (e) => {
 });
 
 /* ---------- music ----------
-   Streamed from the copy already published on the Cosmos portfolio (same
-   origin), so this repo stays light and there's one file to swap. */
-const TRACK = "https://alistair77.github.io/comos_Alistair_portfolio/uploads/awesome-mix-1.mp3";
+   Streamed from the copies already published on the Cosmos portfolio (same
+   origin), so this repo stays light and there's one place to swap tracks. */
+const BASE = "https://alistair77.github.io/comos_Alistair_portfolio/uploads/";
+const TRACKS = [
+  { title: "Awesome Mix Vol. 1", file: "awesome-mix-1.mp3" },
+  { title: "Awesome Mix Vol. 2", file: "awesome-mix-2.mp3" },
+];
 
 const playBtn = document.getElementById("play-btn");
+const chev = document.getElementById("music-toggle");
 const musicPop = document.getElementById("music-pop");
 const vol = document.getElementById("vol");
+const npTitle = document.getElementById("np-title");
+const npSub = document.getElementById("np-sub");
+const listEl = document.getElementById("tracklist");
+
 let audio = null;
+let index = 0;
 
 function setPlayIcon(playing) {
   playBtn.querySelector(".ic-play").hidden = playing;
@@ -43,43 +53,77 @@ function setPlayIcon(playing) {
   playBtn.setAttribute("aria-pressed", String(playing));
   playBtn.setAttribute("aria-label", playing ? "Pause music" : "Play music");
   playBtn.classList.toggle("is-playing", playing);
+  paintList();
 }
 
-if (playBtn) {
-  playBtn.addEventListener("click", async (e) => {
-    e.stopPropagation();
-    if (!audio) {
-      // created on first press, so nothing is fetched on page load
-      audio = new Audio(TRACK);
-      audio.loop = true;
-      audio.volume = (vol?.value ?? 55) / 100;
-      audio.addEventListener("play", () => setPlayIcon(true));
-      audio.addEventListener("pause", () => setPlayIcon(false));
-      audio.addEventListener("error", () => {
-        setPlayIcon(false);
-        const t = musicPop?.querySelector(".music-sub");
-        if (t) t.textContent = "Track unavailable";
-        if (musicPop) place(playBtn, musicPop);
-      });
-    }
-    if (audio.paused) {
-      try { await audio.play(); } catch { setPlayIcon(false); }
-    } else {
-      audio.pause();
-    }
-  });
-
-  // the popover is the secondary action — right-click or long-press
-  playBtn.addEventListener("contextmenu", (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (musicPop) toggle(playBtn, musicPop);
-  });
-  register(null, musicPop);
-  pops.set(playBtn, musicPop);
+function paintList() {
+  if (!listEl) return;
+  const playing = audio && !audio.paused;
+  listEl.innerHTML = TRACKS.map((t, i) =>
+    `<button class="track${i === index ? " current" : ""}" data-i="${i}">
+       <span class="track-dot">${i === index && playing ? "♪" : ""}</span>
+       <span>${t.title}</span>
+     </button>`).join("");
 }
+
+function describe() {
+  const t = TRACKS[index];
+  const playing = audio && !audio.paused;
+  if (npTitle) npTitle.textContent = playing ? t.title : "Paused";
+  if (npSub) npSub.textContent = playing ? "From the Cosmos portfolio" : t.title;
+}
+
+function ensureAudio() {
+  if (audio) return audio;
+  audio = new Audio(BASE + TRACKS[index].file);
+  audio.loop = true;
+  audio.volume = (vol?.value ?? 55) / 100;
+  audio.addEventListener("play", () => { setPlayIcon(true); describe(); });
+  audio.addEventListener("pause", () => { setPlayIcon(false); describe(); });
+  audio.addEventListener("error", () => {
+    setPlayIcon(false);
+    if (npTitle) npTitle.textContent = "Track unavailable";
+    if (npSub) npSub.textContent = "Could not load audio";
+  });
+  return audio;
+}
+
+async function playTrack(i) {
+  index = i;
+  const a = ensureAudio();
+  a.src = BASE + TRACKS[index].file;
+  try { await a.play(); } catch { setPlayIcon(false); }
+  describe();
+}
+
+playBtn?.addEventListener("click", async (e) => {
+  e.stopPropagation();
+  const a = ensureAudio();
+  if (a.paused) {
+    try { await a.play(); } catch { setPlayIcon(false); }
+  } else {
+    a.pause();
+  }
+  describe();
+});
+
+/* the chevron is the "what's playing" toggle */
+chev?.addEventListener("click", (e) => {
+  e.stopPropagation();
+  paintList();
+  describe();
+  toggle(chev, musicPop);
+  chev.setAttribute("aria-expanded", String(!musicPop.hidden));
+});
+if (chev && musicPop) pops.set(chev, musicPop);
+
+listEl?.addEventListener("click", (e) => {
+  const b = e.target.closest(".track");
+  if (b) playTrack(Number(b.dataset.i));
+});
 
 vol?.addEventListener("input", () => { if (audio) audio.volume = vol.value / 100; });
+paintList();
 
 /* ---------- network ---------- */
 const netBtn = document.getElementById("net-btn");

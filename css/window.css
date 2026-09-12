@@ -606,3 +606,54 @@
 .webtab + .webtab { margin-top: 8px; }
 .webtab .pcards { margin: 8px 10px 12px; }
 .sb-group .sb-item { margin-left: 2px; }
+
+/* ---------- pull quote ---------- */
+.quote {
+  margin: 22px 0 4px;
+  padding: 14px 16px;
+  border-left: 2px solid var(--accent);
+  border-radius: 0 9px 9px 0;
+  background: linear-gradient(90deg, rgba(10, 132, 255, 0.10), transparent 70%);
+}
+
+.quote p { margin: 0; color: rgba(235, 235, 245, 0.82); font-size: 14px; line-height: 1.55; }
+.quote em { font-style: normal; color: var(--text); font-weight: 600; }
+
+/* ---------- numbered path ---------- */
+.path { margin: 20px 0 4px; padding: 0; list-style: none; counter-reset: step; }
+
+.path li {
+  position: relative;
+  padding: 0 0 22px 42px;
+  counter-increment: step;
+}
+
+.path li::before {
+  content: counter(step);
+  position: absolute;
+  left: 0;
+  top: 0;
+  display: grid;
+  place-items: center;
+  width: 27px;
+  height: 27px;
+  border-radius: 50%;
+  font-size: var(--text-sm);
+  font-weight: 650;
+  color: var(--accent);
+  background: rgba(10, 132, 255, 0.14);
+  border: 1px solid rgba(10, 132, 255, 0.32);
+}
+
+.path li:not(:last-child)::after {
+  content: "";
+  position: absolute;
+  left: 13px;
+  top: 31px;
+  bottom: 6px;
+  width: 1px;
+  background: var(--hair);
+}
+
+.path h3 { margin: 3px 0 5px; font-size: var(--text-base); font-weight: 650; }
+.path p { margin: 0; font-size: var(--text-sm); }
