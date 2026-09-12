@@ -1,6 +1,7 @@
 /* Desktop shell: clock, menu bar menus, dock magnification + state, terminal. */
 
 import { openApp, closeApp, isOpen } from "./wm.js";
+import { renderProjects } from "./projects.js";
 
 /* ---------- clock ---------- */
 const clock = document.querySelector(".mb-clock");
@@ -13,7 +14,9 @@ function tick() {
   clock.textContent = fmt.format(new Date()).replace(/,/g, "");
 }
 tick();
-setInterval(tick, 15_000);
+/* align to the minute boundary so the displayed time is never stale */
+const scheduleTick = () => setTimeout(() => { tick(); scheduleTick(); }, 60_000 - (Date.now() % 60_000));
+scheduleTick();
 
 /* ---------- dock ---------- */
 const dock = document.querySelector(".dock");
@@ -135,6 +138,23 @@ document.addEventListener("click", (e) => {
   tab?.click();
 });
 
+/* ---------- projects are rendered from data (js/projects.js) ---------- */
+document.addEventListener("app:open", (e) => {
+  if (e.detail !== "projects") return;
+  const body = document.querySelector('.window[data-app="projects"] .win-body');
+  if (body && !body.dataset.rendered) {
+    renderProjects(body);
+    body.dataset.rendered = "1";
+  }
+});
+
+/* project cards jump to their detail pane */
+document.addEventListener("click", (e) => {
+  const card = e.target.closest(".pcard[data-pane]");
+  if (!card) return;
+  card.closest(".win-body").querySelector(`.sb-item[data-pane="${card.dataset.pane}"]`)?.click();
+});
+
 /* ---------- terminal typing ---------- */
 const TYPE_MS = 16;
 document.addEventListener("app:open", (e) => {
@@ -162,6 +182,27 @@ document.addEventListener("app:open", (e) => {
     setTimeout(step, TYPE_MS);
   };
   step();
+});
+
+/* ---------- keyboard shortcuts ----------
+   These are advertised in the menus, so they have to actually work. */
+const SHORTCUTS = {
+  r: () => openApp("resume"),
+  k: () => openApp("contact"),
+  1: () => openApp("projects"),
+};
+
+addEventListener("keydown", (e) => {
+  if (!(e.metaKey || e.ctrlKey)) return;
+  const key = e.key.toLowerCase();
+
+  if (e.altKey && key === "w") {
+    e.preventDefault();
+    document.querySelectorAll(".window").forEach((w) => closeApp(w.dataset.app));
+    return;
+  }
+  const fn = !e.altKey && SHORTCUTS[key];
+  if (fn) { e.preventDefault(); fn(); }
 });
 
 /* ---------- boot ---------- */

@@ -20,9 +20,15 @@
   <button class="mb-item mb-hide" data-menu="m-window" aria-expanded="false">Window</button>
 
   <div class="mb-right">
-    <svg class="mb-hide" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
-      <path d="M2 8.5a15 15 0 0 1 20 0M5 12a10 10 0 0 1 14 0M8.5 15.5a5 5 0 0 1 7 0"/><circle cx="12" cy="19" r="1" fill="currentColor" stroke="none"/>
-    </svg>
+    <button class="mb-icon mb-hide" id="net-btn" aria-label="Network speed" title="Check network speed">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+        <path d="M2 8.5a15 15 0 0 1 20 0M5 12a10 10 0 0 1 14 0M8.5 15.5a5 5 0 0 1 7 0"/><circle cx="12" cy="19" r="1" fill="currentColor" stroke="none"/>
+      </svg>
+    </button>
+    <button class="mb-icon" id="play-btn" aria-label="Play music" aria-pressed="false">
+      <svg class="ic-play" width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15l13-7.5z"/></svg>
+      <svg class="ic-pause" width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" hidden><path d="M6.5 4.5h4v15h-4zm7 0h4v15h-4z"/></svg>
+    </button>
     <svg class="mb-hide" width="26" height="14" viewBox="0 0 26 14" fill="none" aria-hidden="true">
       <rect x="0.6" y="0.6" width="20" height="12.8" rx="3.6" stroke="currentColor" stroke-opacity=".5"/>
       <rect x="2.4" y="2.4" width="13" height="9.2" rx="2.2" fill="currentColor"/>
@@ -33,6 +39,21 @@
 </div>
 
 <div class="mb-menu" hidden></div>
+
+<div class="popover" id="net-pop" hidden>
+  <h4>Network</h4>
+  <p class="net-line"><span>Status</span><b id="net-status">—</b></p>
+  <p class="net-line"><span>Latency</span><b id="net-ping">—</b></p>
+  <p class="net-line"><span>Download</span><b id="net-speed">—</b></p>
+  <button class="btn" id="net-run">Run test</button>
+</div>
+
+<div class="popover" id="music-pop" hidden>
+  <h4>Now Playing</h4>
+  <p class="music-title">Awesome Mix</p>
+  <p class="music-sub">From the Cosmos portfolio</p>
+  <input type="range" id="vol" min="0" max="100" value="55" aria-label="Volume">
+</div>
 
 <!-- menu contents -->
 <template id="m-system">
@@ -149,9 +170,14 @@
     </span>
   </button>
   <span class="dock-sep"></span>
-  <a class="dock-item" href="https://github.com/Alistair77" target="_blank" rel="noopener" data-tip="GitHub" aria-label="GitHub">
-    <span class="glyph" style="background:linear-gradient(160deg,#4A4F57,#1B1E23)">
-      <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 7 4 12l4.5 5M15.5 7 20 12l-4.5 5"/></svg>
+  <a class="dock-item" href="https://github.com/Alistair77" target="_blank" rel="noopener" data-tip="GitHub" aria-label="GitHub profile">
+    <span class="glyph" style="background:linear-gradient(160deg,#4A4F57,#16181C)">
+      <svg viewBox="0 0 24 24" fill="#fff" aria-hidden="true"><path d="M12 .5C5.73.5.5 5.73.5 12c0 5.09 3.29 9.4 7.86 10.93.58.1.79-.25.79-.56v-2.1c-3.2.7-3.88-1.37-3.88-1.37-.53-1.34-1.29-1.7-1.29-1.7-1.05-.72.08-.7.08-.7 1.16.08 1.77 1.19 1.77 1.19 1.03 1.77 2.7 1.26 3.36.96.1-.75.4-1.26.73-1.55-2.56-.29-5.25-1.28-5.25-5.7 0-1.26.45-2.29 1.19-3.1-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.18 1.18a11 11 0 0 1 5.8 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.76.12 3.05.74.81 1.18 1.84 1.18 3.1 0 4.43-2.69 5.4-5.26 5.69.41.36.78 1.06.78 2.14v3.17c0 .31.21.67.8.56A11.51 11.51 0 0 0 23.5 12C23.5 5.73 18.27.5 12 .5z"/></svg>
+    </span>
+  </a>
+  <a class="dock-item" href="https://linkedin.com/in/alistair77" target="_blank" rel="noopener" data-tip="LinkedIn" aria-label="LinkedIn profile">
+    <span class="glyph" style="background:linear-gradient(160deg,#2C8FD6,#0A66C2)">
+      <svg viewBox="0 0 24 24" fill="#fff" aria-hidden="true"><path d="M4.98 3.5a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5zM3 9h4v12H3zM9.5 9h3.8v1.64h.06c.53-.95 1.83-1.95 3.76-1.95 4.02 0 4.76 2.5 4.76 5.76V21h-4v-5.6c0-1.34-.03-3.06-1.9-3.06-1.9 0-2.19 1.46-2.19 2.96V21h-4z"/></svg>
     </span>
   </a>
 </nav>
@@ -219,174 +245,26 @@
   </div>
 </template>
 
-<template data-app="projects" data-title="Projects" data-width="900" data-height="570">
-  <nav class="sidebar">
-    <div class="sb-label">Library</div>
-    <button class="sb-item" data-pane="all" aria-selected="true">All work</button>
-    <div class="sb-label">AI Engineering</div>
-    <button class="sb-item" data-pane="ragstar">RAGStar</button>
-    <button class="sb-item" data-pane="orchestrator">Agent Orchestrator</button>
-    <button class="sb-item" data-pane="evals">Agent Evals</button>
-    <div class="sb-label">Web / Frontend</div>
-    <button class="sb-item" data-pane="hawkai">HawkAI</button>
-    <button class="sb-item" data-pane="quanta">Quantasphere</button>
-    <button class="sb-item" data-pane="cosmos">Cosmos Portfolio</button>
-  </nav>
-  <div class="content">
-    <section class="pane" data-pane="all">
-      <p class="eyebrow">Selected work</p>
-      <h1>Projects</h1>
-      <p>Six that show the range — retrieval and agent systems on one side, real-time 3D interfaces on the other. Click one for the detail.</p>
-      <div class="rows">
-        <button class="row" data-pane="ragstar">
-          <span class="dot" style="background:linear-gradient(160deg,#7C5CFF,#3B22B8)"></span>
-          <span><h3>RAGStar</h3><p>Hybrid search RAG — vector + BM25, fused and reranked</p></span>
-          <span class="meta">2026</span>
-        </button>
-        <button class="row" data-pane="orchestrator">
-          <span class="dot" style="background:linear-gradient(160deg,#5AD1C8,#0E8C88)"></span>
-          <span><h3>Agent Orchestrator</h3><p>Plan → Act → Reflect loop with human checkpoints</p></span>
-          <span class="meta">2026</span>
-        </button>
-        <button class="row" data-pane="evals">
-          <span class="dot" style="background:linear-gradient(160deg,#FFB25C,#E0731A)"></span>
-          <span><h3>Agent Evals</h3><p>LLM evaluation pipeline — judge, persist, catch regressions</p></span>
-          <span class="meta">2026</span>
-        </button>
-        <button class="row" data-pane="hawkai">
-          <span class="dot" style="background:linear-gradient(160deg,#FF7A9C,#D2295C)"></span>
-          <span><h3>HawkAI</h3><p>3D authentication UI — Three.js, custom GLSL, particles</p></span>
-          <span class="meta">2026</span>
-        </button>
-        <button class="row" data-pane="quanta">
-          <span class="dot" style="background:linear-gradient(160deg,#63B3FF,#1668E3)"></span>
-          <span><h3>Quantasphere</h3><p>Interactive hero — mouse-scrubbed video, zero frameworks</p></span>
-          <span class="meta">2026</span>
-        </button>
-        <button class="row" data-pane="cosmos">
-          <span class="dot" style="background:linear-gradient(160deg,#9AA6FF,#4B52D6)"></span>
-          <span><h3>Cosmos Portfolio System</h3><p>3D satellite scene, scroll timeline, WebGL starfield</p></span>
-          <span class="meta">2026 —</span>
-        </button>
-      </div>
-      <h2>Also in progress</h2>
-      <p>Study Snippets, Health Weight, and a running set of experiments.</p>
-    </section>
-
-    <section class="pane" data-pane="ragstar" hidden>
-      <p class="eyebrow">2026 · AI Engineering</p>
-      <h1>RAGStar</h1>
-      <p class="lede">A hybrid retrieval pipeline that answers from your documents and cites them — running a local model, so nothing leaves the machine.</p>
-      <h2>Retrieval</h2>
-      <p>Pinecone vector search and BM25 keyword search run side by side, merged with <strong>Reciprocal Rank Fusion</strong> at a k=60 smoothing constant. Dense search alone misses exact terms; sparse alone misses meaning. Fusing them covers both.</p>
-      <h2>Precision</h2>
-      <p>A Cohere cross-encoder reranks the top 20 candidates before anything reaches the model, so the context window carries signal rather than volume. Generation runs on a local <strong>Ollama</strong> model — private, and grounded in citations.</p>
-      <h2>Engineering</h2>
-      <p>FastAPI service with Pydantic validation at the boundary. Chunk IDs are deterministic MD5 hashes, so re-ingesting a document updates it instead of silently duplicating it. Covered by unit tests.</p>
-      <div class="tags"><span class="tag">Python</span><span class="tag">FastAPI</span><span class="tag">Pinecone</span><span class="tag">BM25</span><span class="tag">Cohere</span><span class="tag">Ollama</span><span class="tag">Pydantic</span></div>
-      <div class="btn-row"><a class="btn primary" href="https://github.com/Alistair77/ragstar" target="_blank" rel="noopener">View repository</a></div>
-    </section>
-
-    <section class="pane" data-pane="orchestrator" hidden>
-      <p class="eyebrow">2026 · AI Engineering</p>
-      <h1>Agent Orchestrator</h1>
-      <p class="lede">A multi-step agent that decomposes a task, runs tools, and critiques its own work before deciding what to do next.</p>
-      <h2>The loop</h2>
-      <p><strong>Plan → Act → Reflect.</strong> The agent breaks the task down, executes, then self-critiques each step before choosing the next move — so a bad step gets caught at the step, not at the end of the run.</p>
-      <h2>Human in the loop</h2>
-      <p>Built on LangGraph over Claude, with checkpoints that pause and wait for approval before high-impact actions. Autonomy where it's cheap, a human where it isn't.</p>
-      <h2>Debuggability</h2>
-      <p>Run state is structured and resumable, with step-level tracing. You can replay a run deterministically instead of reconstructing what the agent was thinking.</p>
-      <div class="tags"><span class="tag">Python</span><span class="tag">LangGraph</span><span class="tag">Claude</span><span class="tag">Tool use</span><span class="tag">Tracing</span></div>
-      <div class="btn-row"><a class="btn primary" href="https://github.com/Alistair77/agent-orchestrator" target="_blank" rel="noopener">View repository</a></div>
-    </section>
-
-    <section class="pane" data-pane="evals" hidden>
-      <p class="eyebrow">2026 · AI Engineering</p>
-      <h1>Agent Evals</h1>
-      <p class="lede">An evaluation pipeline for LLM output — because "it seems better now" is not a metric.</p>
-      <h2>Scoring</h2>
-      <p>Synthetic eval datasets generated per task, scored with a <strong>Claude-as-judge</strong> rubric so grading stays consistent and — more usefully — explainable. A failed case tells you why it failed.</p>
-      <h2>Storage</h2>
-      <p>Every run and metric lands in DuckDB, which makes slicing across prompts, models and versions fast enough to actually do it.</p>
-      <h2>Inspection</h2>
-      <p>A Streamlit dashboard to read failures, compare runs side by side, and catch quality regressions before they ship.</p>
-      <div class="tags"><span class="tag">Python</span><span class="tag">Claude-as-judge</span><span class="tag">DuckDB</span><span class="tag">Streamlit</span><span class="tag">Evals</span></div>
-      <div class="btn-row"><a class="btn primary" href="https://github.com/Alistair77/agent-evals" target="_blank" rel="noopener">View repository</a></div>
-    </section>
-
-    <section class="pane" data-pane="hawkai" hidden>
-      <p class="eyebrow">2026 · Frontend Engineering</p>
-      <h1>HawkAI</h1>
-      <p class="lede">A 3D authentication screen — a login page that earns the attention it takes.</p>
-      <h2>The scene</h2>
-      <p>A Draco-compressed GLB security camera model in Three.js, tracking the cursor in real time with genuine depth response rather than a flat parallax trick.</p>
-      <h2>Shaders and atmosphere</h2>
-      <p>Custom <strong>GLSL</strong> shaders drive animated data-flow ribbons, with a particle system of 600+ floating dust points for depth. Cinematic without tipping into noise.</p>
-      <h2>Composition</h2>
-      <p>The WebGL layer renders transparent and composites under an Ant Design form, so the 3D is atmosphere and the form stays a real, accessible form. Rendering adapts to the viewport rather than shipping one heavy scene to every device.</p>
-      <div class="tags"><span class="tag">React</span><span class="tag">Three.js</span><span class="tag">GLSL</span><span class="tag">Ant Design</span><span class="tag">WebGL</span></div>
-      <div class="btn-row"><a class="btn" href="https://github.com/Alistair77" target="_blank" rel="noopener">GitHub profile</a></div>
-    </section>
-
-    <section class="pane" data-pane="quanta" hidden>
-      <p class="eyebrow">2026 · Creative Development</p>
-      <h1>Quantasphere</h1>
-      <p class="lede">A full-viewport hero where moving the mouse scrubs the video. No framework, no build step.</p>
-      <h2>Interaction</h2>
-      <p>Cursor X position maps directly to the video playhead, so the viewer controls the pace of the story instead of watching it happen at them.</p>
-      <h2>Blending</h2>
-      <p>CSS <code>mask-image</code> gradients dissolve the video into the page background, with frosted-glass navigation over the top via <code>backdrop-filter</code>.</p>
-      <h2>Discipline</h2>
-      <p>Respects <code>prefers-reduced-motion</code>, and ships as plain HTML, CSS and JavaScript — zero dependencies, zero tooling.</p>
-      <div class="tags"><span class="tag">Vanilla JS</span><span class="tag">CSS masks</span><span class="tag">Video engineering</span><span class="tag">Accessibility</span></div>
-      <div class="btn-row"><a class="btn" href="https://github.com/Alistair77" target="_blank" rel="noopener">GitHub profile</a></div>
-    </section>
-
-    <section class="pane" data-pane="cosmos" hidden>
-      <p class="eyebrow">2026 — present · Full-stack</p>
-      <h1>Cosmos Portfolio System</h1>
-      <p class="lede">A single-page portfolio built as a motion and 3D exercise — and a stress test for how much you can ship without it feeling heavy.</p>
-      <h2>3D</h2>
-      <p>Three.js satellite rendering with a custom GLB model on a real-time animation loop, plus a WebGL starfield with parallax mouse tracking.</p>
-      <h2>Motion</h2>
-      <p>A modular project showcase with staggered card reveals, and a scroll-driven timeline built on IntersectionObserver and Lenis.</p>
-      <h2>Detail</h2>
-      <p>Live UTC clock and multi-layer video playback with lazy loading, so the atmosphere doesn't cost the first paint.</p>
-      <div class="tags"><span class="tag">Three.js</span><span class="tag">WebGL</span><span class="tag">GSAP</span><span class="tag">Lenis</span><span class="tag">IntersectionObserver</span></div>
-    </section>
-  </div>
+<template data-app="projects" data-title="Projects" data-width="920" data-height="600">
+  <nav class="sidebar"></nav>
+  <div class="content"></div>
 </template>
 
-<template data-app="resume" data-title="Résumé.pdf" data-width="760" data-height="580">
-  <div class="content">
-    <p class="eyebrow">Curriculum vitae</p>
-    <h1>Alistair Rodrigues</h1>
-    <p class="lede">AI · Data · UX Engineer — <a href="mailto:alistairar7@gmail.com">alistairar7@gmail.com</a></p>
-    <hr class="rule">
-    <h2>Education</h2>
-    <ul class="tl-list">
-      <li><h3>MSc Advanced Computer Science</h3><span class="when">University of Strathclyde</span>
-        <p>Focus on applied AI — retrieval systems, agent architectures and evaluation.</p></li>
-    </ul>
-    <h2>Selected projects</h2>
-    <ul class="tl-list">
-      <li><h3>RAGStar — Hybrid Search RAG</h3><span class="when">2026</span>
-        <p>Pinecone + BM25 fused with Reciprocal Rank Fusion, Cohere reranking, local Ollama generation behind a tested FastAPI service.</p></li>
-      <li><h3>Agent Orchestrator</h3><span class="when">2026</span>
-        <p>Plan/Act/Reflect agent loop on LangGraph and Claude, with human-in-the-loop approval and resumable, traceable run state.</p></li>
-      <li><h3>Agent Evals</h3><span class="when">2026</span>
-        <p>Claude-as-judge scoring over synthetic datasets, persisted in DuckDB, inspected through a Streamlit regression dashboard.</p></li>
-      <li><h3>HawkAI — 3D Authentication UI</h3><span class="when">2026</span>
-        <p>Three.js scene with custom GLSL shaders and a 600+ point particle system, composited under an Ant Design form.</p></li>
-      <li><h3>Quantasphere — Interactive Hero</h3><span class="when">2026</span>
-        <p>Mouse-driven video scrubbing and CSS mask blending, built with no frameworks or build tooling.</p></li>
-    </ul>
-    <h2>Skills</h2>
-    <div class="tags"><span class="tag">Python</span><span class="tag">Kotlin</span><span class="tag">FastAPI</span><span class="tag">React</span><span class="tag">AI/ML</span><span class="tag">Three.js</span><span class="tag">GLSL</span><span class="tag">LangGraph</span><span class="tag">DuckDB</span><span class="tag">Pinecone</span></div>
-    <div class="btn-row">
-      <a class="btn primary" href="https://alistair77.github.io/comos_Alistair_portfolio/uploads/resume.pdf" target="_blank" rel="noopener">Open full PDF</a>
-      <button class="btn" data-open="contact">Get in touch</button>
+<template data-app="resume" data-title="Résumé.pdf" data-width="820" data-height="640">
+  <div class="pdfwrap">
+    <object class="pdfview" data="assets/resume.pdf#view=FitH" type="application/pdf">
+      <div class="pdffallback">
+        <h2>Preview unavailable</h2>
+        <p>Your browser can't display the PDF inline — open or download it instead.</p>
+        <a class="btn primary" href="assets/resume.pdf" target="_blank" rel="noopener">Open PDF</a>
+      </div>
+    </object>
+    <div class="pdfbar">
+      <span>Alistair Rodrigues — Résumé · PDF</span>
+      <span class="pdfbar-actions">
+        <a class="btn" href="assets/resume.pdf" target="_blank" rel="noopener">Open in tab</a>
+        <a class="btn primary" href="assets/resume.pdf" download="Alistair-Rodrigues-Resume.pdf">Download PDF</a>
+      </span>
     </div>
   </div>
 </template>
@@ -413,25 +291,51 @@ alistairar7@gmail.com
 <span class="u">alistair@cosmos</span>:<span class="p">~</span>$ <span class="caret"></span></pre>
 </template>
 
-<template data-app="contact" data-title="New Message" data-width="620" data-height="440">
+<template data-app="contact" data-title="Get in touch" data-width="660" data-height="500">
   <div class="content">
     <p class="eyebrow">Say hello</p>
     <h1>Let's talk.</h1>
-    <p class="lede">Roles, collaborations, or a hard retrieval problem you can't stop thinking about — all welcome.</p>
-    <hr class="rule">
-    <h2>Email</h2>
-    <p><a href="mailto:alistairar7@gmail.com">alistairar7@gmail.com</a></p>
-    <h2>Elsewhere</h2>
-    <p><a href="https://github.com/Alistair77" target="_blank" rel="noopener">GitHub</a> · <a href="https://linkedin.com/in/alistair77" target="_blank" rel="noopener">LinkedIn</a></p>
+    <p class="lede">Roles, collaborations, or a hard retrieval problem you can't stop thinking about — all welcome. I read everything and reply within a day or two.</p>
+
+    <div class="contact-grid">
+      <a class="ccard" href="mailto:alistairar7@gmail.com">
+        <span class="ccard-ic" style="background:linear-gradient(160deg,#6FE09A,#12A85C)">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.9" stroke-linejoin="round"><rect x="3" y="5.5" width="18" height="13" rx="2.4"/><path d="m3.8 7 8.2 6 8.2-6"/></svg>
+        </span>
+        <span><b>Email</b><em>alistairar7@gmail.com</em></span>
+      </a>
+      <button class="ccard" id="copy-mail">
+        <span class="ccard-ic" style="background:linear-gradient(160deg,#8C93A8,#4A4F5E)">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.9" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2.2"/><path d="M5 15V6a2 2 0 0 1 2-2h8"/></svg>
+        </span>
+        <span><b>Copy address</b><em id="copy-state">One click</em></span>
+      </button>
+      <a class="ccard" href="https://github.com/Alistair77" target="_blank" rel="noopener">
+        <span class="ccard-ic" style="background:linear-gradient(160deg,#4A4F57,#16181C)">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="#fff"><path d="M12 .5C5.73.5.5 5.73.5 12c0 5.09 3.29 9.4 7.86 10.93.58.1.79-.25.79-.56v-2.1c-3.2.7-3.88-1.37-3.88-1.37-.53-1.34-1.29-1.7-1.29-1.7-1.05-.72.08-.7.08-.7 1.16.08 1.77 1.19 1.77 1.19 1.03 1.77 2.7 1.26 3.36.96.1-.75.4-1.26.73-1.55-2.56-.29-5.25-1.28-5.25-5.7 0-1.26.45-2.29 1.19-3.1-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.18 1.18a11 11 0 0 1 5.8 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.76.12 3.05.74.81 1.18 1.84 1.18 3.1 0 4.43-2.69 5.4-5.26 5.69.41.36.78 1.06.78 2.14v3.17c0 .31.21.67.8.56A11.51 11.51 0 0 0 23.5 12C23.5 5.73 18.27.5 12 .5z"/></svg>
+        </span>
+        <span><b>GitHub</b><em>@Alistair77</em></span>
+      </a>
+      <a class="ccard" href="https://linkedin.com/in/alistair77" target="_blank" rel="noopener">
+        <span class="ccard-ic" style="background:linear-gradient(160deg,#2C8FD6,#0A66C2)">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="#fff"><path d="M4.98 3.5a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5zM3 9h4v12H3zM9.5 9h3.8v1.64h.06c.53-.95 1.83-1.95 3.76-1.95 4.02 0 4.76 2.5 4.76 5.76V21h-4v-5.6c0-1.34-.03-3.06-1.9-3.06-1.9 0-2.19 1.46-2.19 2.96V21h-4z"/></svg>
+        </span>
+        <span><b>LinkedIn</b><em>in/alistair77</em></span>
+      </a>
+    </div>
+
     <h2>Currently</h2>
-    <p>Finishing an MSc in Advanced Computer Science at Strathclyde, and building agent tooling in the meantime. Open to AI engineering roles.</p>
+    <p>Finishing an MSc in Advanced Computer Science at Strathclyde, and building agent tooling in the meantime. Open to AI engineering roles and freelance work.</p>
+
     <div class="btn-row">
       <a class="btn primary" href="mailto:alistairar7@gmail.com">Compose email</a>
       <button class="btn" data-open="resume">View résumé</button>
+      <button class="btn" data-open="projects">See the work</button>
     </div>
   </div>
 </template>
 
 <script type="module" src="js/desktop.js"></script>
+<script type="module" src="js/statusbar.js"></script>
 </body>
 </html>

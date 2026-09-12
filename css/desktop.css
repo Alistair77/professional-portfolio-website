@@ -181,6 +181,9 @@
 }
 
 .mb-right svg { display: block; opacity: 0.9; }
+/* the display rule above outranks [hidden]'s default display:none, so the
+   inactive play/pause icon needs an explicit override */
+.mb-right svg[hidden] { display: none; }
 
 .mb-clock {
   font-variant-numeric: tabular-nums;
@@ -385,4 +388,61 @@ body.booting .desk-icons { opacity: 0; }
   .dock { gap: 6px; padding: 6px 9px 10px; --dock-icon: 46px; }
   .mb-hide { display: none; }
   .mb-clock { min-width: 0; }
+}
+
+/* ---------- menu-bar icon buttons ---------- */
+.mb-icon {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 22px;
+  padding: 0;
+  border: 0;
+  border-radius: 6px;
+  background: none;
+  color: inherit;
+  cursor: default;
+  transition: background var(--dur-fast) var(--ease), color var(--dur-fast) var(--ease);
+}
+
+.mb-icon:hover { background: rgba(255, 255, 255, 0.16); }
+.mb-icon.is-playing { color: var(--green); }
+
+/* ---------- status popovers ---------- */
+.popover {
+  position: fixed;
+  top: calc(var(--menubar-h) - 3px);
+  z-index: 950;
+  width: 232px;
+  padding: 13px 14px 14px;
+  border-radius: var(--radius-pop);
+  background: var(--sheet);
+  backdrop-filter: var(--blur-chrome);
+  -webkit-backdrop-filter: var(--blur-chrome);
+  border: 1px solid var(--hair-strong);
+  box-shadow: var(--shadow-pop);
+  animation: popIn var(--dur-fast) var(--ease) both;
+}
+
+.popover[hidden] { display: none; }
+.popover h4 { margin: 0 0 9px; font-size: var(--text-sm); color: var(--muted-2); font-weight: 600; }
+
+.net-line {
+  display: flex;
+  justify-content: space-between;
+  margin: 0 0 6px;
+  font-size: var(--text-sm);
+}
+
+.net-line span { color: var(--muted); }
+.net-line b { font-variant-numeric: tabular-nums; font-weight: 600; }
+.popover .btn { width: 100%; margin-top: 9px; text-align: center; }
+.popover .btn:disabled { opacity: 0.55; }
+
+.music-title { margin: 0; font-weight: 600; }
+.music-sub { margin: 2px 0 11px; font-size: var(--text-sm); color: var(--muted-2); }
+
+#vol {
+  width: 100%;
+  accent-color: var(--accent);
 }

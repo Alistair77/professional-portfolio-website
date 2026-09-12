@@ -21,72 +21,110 @@ Focus on applied AI: retrieval systems, agent architectures and evaluation.
 ## Selected Projects
 
 ### RAGStar — Hybrid Search RAG
-`Python` `FastAPI` `Pinecone` `BM25` `Cohere` `Ollama` `Pydantic`
+`Python` `FastAPI` `BM25` `RRF` `Cross-encoder` `Ollama` `WASM`
 
-Hybrid retrieval pipeline combining Pinecone vector search with BM25 keyword
-search, merged via Reciprocal Rank Fusion at a k=60 smoothing constant. Cohere
-cross-encoder reranking over the top-20 candidates for precision, with a local
-Ollama LLM for private, citation-grounded generation. FastAPI layer with
-Pydantic validation, deterministic MD5-hashed chunk IDs to prevent duplicate
-ingestion, and comprehensive unit tests.
+Ask questions about your own documents and get cited answers — with no API keys
+and nothing leaving your machine. Vector search, BM25, Reciprocal Rank Fusion,
+cross-encoder reranking and a refusal gate all run locally, with Ollama handling
+generation. When the documents don't cover a question it refuses outright rather
+than inventing an answer, and makes no LLM call at all. A full retrieval readout
+shows every stage with its scores, colour-coded by which retriever surfaced each
+row.
 
+🔗 **[Live retrieval demo](https://alistair77.github.io/ragstar/)** — runs the real
+pipeline in WASM, in your browser
 → [github.com/Alistair77/ragstar](https://github.com/Alistair77/ragstar)
 
-### Agent Orchestrator — Plan · Act · Reflect
-`Python` `LangGraph` `Claude` `Human-in-the-loop`
+### Zetsu — Voice Agent
+`Python` `Wake word` `Barge-in` `Echo cancellation` `Local STT/TTS` `Tool gating`
 
-Multi-step agent loop that decomposes a task, executes tools, and self-critiques
-each step before choosing the next move. Orchestrated with LangGraph, with
-human-in-the-loop checkpoints that pause for approval on high-impact actions.
-Structured, resumable run state with step-level tracing for deterministic
-replays and easier debugging.
+A voice-first assistant running entirely on your own machine — no API keys, no
+accounts, no audio leaving the laptop. Say the wake word once and it keeps
+listening for follow-ups; talk over it and it stops mid-word in 85ms. Real echo
+cancellation means it recognises its own output instead of interrupting itself.
+A safety gate stops every consequential action and asks first, prompt injection
+is screened and logged, and everything lands in an audit trail. Built text-first
+with voice as a layer that never forks the logic, so the text path always works
+and a self-test runs with no mic, model or network.
+
+→ [github.com/Alistair77/zetsu-voice-agent](https://github.com/Alistair77/zetsu-voice-agent)
+
+### Agent Orchestrator — Plan · Act · Reflect
+`Python` `LangGraph` `Claude` `Redis` `Postgres` `FastAPI`
+
+A production-shaped multi-step agent with a human holding the kill switch. The
+model is treated as untrusted input that can only ever *request* an action — the
+harness decides whether it's safe, executes it, records it, and hands back the
+result. Typed tools, Redis session memory, a human-in-the-loop approval gate for
+dangerous actions, and a fully replayable append-only Postgres audit log of every
+decision the agent ever made.
 
 → [github.com/Alistair77/agent-orchestrator](https://github.com/Alistair77/agent-orchestrator)
 
 ### Agent Evals — LLM Evaluation Pipeline
-`Python` `Claude-as-judge` `DuckDB` `Streamlit`
+`Python` `Claude-as-judge` `K-means` `DuckDB` `Streamlit` `Postgres`
 
-Synthetic eval dataset generation, with model outputs scored against a
-Claude-as-judge rubric for consistent, explainable grading. Every run and metric
-persisted in DuckDB for fast analysis across prompts, models and versions.
-Streamlit dashboard to inspect failures, compare runs, and catch quality
-regressions over time.
+Measures whether a new agent version quietly broke something the last one handled
+fine. Ingests real run logs from Postgres, clusters prompts into groups, then
+samples the most representative case per cluster plus every high-risk run. A
+judge writes the correct answer and a grading rubric for each, forming a golden
+set; new versions are scored 1–5 on correctness, groundedness and safety. Results
+land in DuckDB and surface in a Streamlit dashboard with per-failure drilldown.
 
 → [github.com/Alistair77/agent-evals](https://github.com/Alistair77/agent-evals)
 
-### HawkAI — 3D Authentication UI
-`React` `Three.js` `GLSL` `Ant Design` `WebGL`
+### Semantic Cache — LLMOps Layer
+`Python` `FastAPI` `FAISS` `MiniLM` `Caching`
 
-Three.js scene featuring a Draco-compressed GLB security camera model with
-real-time mouse-responsive tracking and depth. Custom GLSL shaders for animated
-data-flow ribbons, and a particle system with 600+ floating dust points for
-cinematic atmosphere. Responsive, optimised 3D rendering with dynamic viewport
-adaptation and a transparent WebGL overlay composited with Ant Design form UI.
+A FastAPI proxy that answers repeated or near-duplicate prompts from a vector
+cache instead of calling the model. Prompts are embedded locally and searched
+against a FAISS index; on L2-normalised vectors, inner product is cosine
+similarity, so anything above the threshold returns cached. Entries carry a TTL
+with lazy expiry, and metrics report hit rate, latency and tokens and cost saved.
+The agent run endpoint is deliberately not proxied — agent runs mutate state, so
+replaying a cached response would skip real side effects.
 
-### Quantasphere — Interactive Hero
-`Vanilla HTML/CSS/JS` `Video engineering` `Accessibility`
+→ [github.com/Alistair77/semantic-cache](https://github.com/Alistair77/semantic-cache)
 
-Full-viewport hero with custom JavaScript-driven video scrubbing — mouse
-X-position maps to precise playhead control for interactive storytelling. CSS
-`mask-image` gradients for seamless video-to-background blending, and
-frosted-glass navigation via `backdrop-filter`. Respects
-`prefers-reduced-motion` and requires zero frameworks or build tooling.
+### Mobile
 
-### Cosmos Portfolio System
-`Three.js` `WebGL` `GSAP` `Lenis` `IntersectionObserver`
+| Project | Stack | |
+|---|---|---|
+| **Study Snippets** — study-notes app | Kotlin, Android | [repo](https://github.com/Alistair77/study_snipp) |
+| **Health Weight** — weight and health tracking | Kotlin, Jetpack Compose | [repo](https://github.com/Alistair77/health-weight-app-compose) |
 
-Single-page portfolio with Three.js 3D satellite rendering, custom GLB model
-integration and a real-time animation loop. Modular project showcase with
-staggered card reveal mechanics and a scroll-driven timeline. WebGL starfield
-with parallax mouse tracking, live UTC clock, and multi-layer video playback
-with lazy loading.
+### Data / ML
+
+**AAPL Stock Prediction** — time-series modelling on Apple stock data, worked
+through in a notebook. `Jupyter` `Python`
+→ [github.com/Alistair77/AAPL_stock_prediction-2024](https://github.com/Alistair77/AAPL_stock_prediction-2024)
+
+### Web Development
+
+<details>
+<summary>Earlier and supporting web work</summary>
+
+| Project | | |
+|---|---|---|
+| **Cosmos Portfolio** — WebGL space-themed portfolio | [repo](https://github.com/Alistair77/comos_Alistair_portfolio) | [live](https://alistair77.github.io/comos_Alistair_portfolio/) |
+| **This site** — macOS-inspired desktop portfolio | [repo](https://github.com/Alistair77/professional-portfolio-website) | [live](https://alistair77.github.io/professional-portfolio-website/) |
+| **Pythonsphere** — React + Vite marketing site | [repo](https://github.com/Alistair77/pythonsphere) | |
+| **Qretical Nomad Hero** — animated hero study | [repo](https://github.com/Alistair77/qretical-nomad-hero) | |
+| **Portfolio v1** — the first portfolio, TypeScript | [repo](https://github.com/Alistair77/portfolio_v1) | |
+| **To-Do List** — Node and EJS templating | [repo](https://github.com/Alistair77/To-do-list-1.0) | |
+| **City Temperature** — weather lookup page | [repo](https://github.com/Alistair77/city-temp-webpg) | |
+| **Newsletter 2.0** — signup page rebuild | [repo](https://github.com/Alistair77/Newsletter-2.0) | |
+| **Drum Kit** — keyboard-driven drum machine | [repo](https://github.com/Alistair77/drum-based-website) | |
+| **Small Games** — early JavaScript experiments | [repo](https://github.com/Alistair77/few-games) | |
+
+</details>
 
 ---
 
 ## Skills
 
-**AI & Data** — Python · LangGraph · Claude · Pinecone · BM25 · Cohere · Ollama · DuckDB
-**Backend** — FastAPI · Pydantic · Kotlin · Streamlit · Unit testing
+**AI & Data** — Python · LangGraph · Claude · FAISS · BM25 · RRF · Ollama · DuckDB · K-means
+**Backend** — FastAPI · Pydantic · Postgres · Redis · Kotlin · Streamlit · Unit testing
 **Frontend & 3D** — React · Three.js · GLSL · WebGL · GSAP · Ant Design · Vanilla JS
 
 ---
