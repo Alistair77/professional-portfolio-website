@@ -1,0 +1,175 @@
+/* Phone layout. Loaded last so it wins ties; every rule is inside a
+   max-width breakpoint, so the desktop layout is never affected. */
+
+/* ═══════════════════════════════════════════════════════════════
+   PHONE LAYOUT
+   Everything below is inside the mobile breakpoint, so the desktop
+   layout is untouched. window.css loads last, so these win ties.
+   ═══════════════════════════════════════════════════════════════ */
+@media (max-width: 760px) {
+  /* Scale the whole system up. Desktop sizes assume a pointer and a
+     viewing distance of ~60cm; a phone is held at ~30cm and tapped with
+     a finger, so both type and targets need real size. */
+  :root {
+    --text-xs: 12.5px;
+    --text-sm: 14.5px;
+    --text-base: 16px;
+    --text-lg: 19px;
+    --text-title: clamp(1.85rem, 1.4rem + 4vw, 2.4rem);
+    --menubar-h: 46px;
+    --dock-icon: 52px;
+  }
+
+  /* ---------- menu bar ---------- */
+  .menubar { padding: 0 8px; gap: 0; }
+  .mb-item { padding: 7px 9px; }
+  .mb-mark { font-size: 16px; }
+  .mb-icon { width: 36px; height: 36px; }
+  .mb-chev { width: 26px; }
+  .mb-right { gap: 4px; }
+  .mb-clock { font-size: var(--text-sm); }
+
+  /* ---------- dock: scrolls rather than shrinking ---------- */
+  .dock {
+    gap: 8px;
+    padding: 8px 12px 12px;
+    max-width: calc(100vw - 12px);
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: none;
+    justify-content: flex-start;
+    border-radius: 20px;
+  }
+
+  .dock::-webkit-scrollbar { display: none; }
+  .dock-item::after { display: none; } /* tooltips are pointless without hover */
+
+  /* ---------- windows ---------- */
+  .window {
+    width: calc(100vw - 12px) !important;
+    height: calc(100vh - var(--menubar-h) - 108px) !important;
+    left: 6px !important;
+    top: calc(var(--menubar-h) + 8px) !important;
+    border-radius: 14px;
+  }
+
+  /* Desktop leans on backdrop-filter for legibility (surfaces are 62-74%
+     opaque). Phones disable it under low-power mode and it is expensive to
+     composite while scrolling — so make the surfaces carry the contrast
+     themselves and drop the blur entirely. */
+  .window {
+    background: rgba(28, 30, 37, 0.97);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+
+  .content { background: rgba(20, 21, 27, 0.99); }
+  .sidebar { background: rgba(44, 46, 55, 0.99); }
+  .titlebar { background: rgba(56, 58, 68, 0.99); }
+  .menubar { background: rgba(14, 16, 23, 0.92); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px); }
+  .dock { background: rgba(48, 50, 60, 0.86); }
+  .popover { background: rgba(26, 28, 34, 0.98); }
+
+  .titlebar { height: 48px; padding: 0 14px; }
+  .title { font-size: var(--text-base); }
+
+  /* traffic lights are 12px on desktop — far too small for a fingertip */
+  .traffic { gap: 12px; }
+  .traffic button { width: 15px; height: 15px; }
+  .traffic button::after { opacity: 1; } /* no hover on touch, so always show */
+  .traffic .tl-close::after { content: "\00d7"; font-size: 14px; }
+  .traffic .tl-min::after { content: "\2013"; }
+  .traffic .tl-max::after { content: "\2922"; font-size: 9px; }
+
+  /* ---------- tap targets: 44px minimum throughout ---------- */
+  .sidebar { padding: 9px 10px; gap: 8px; }
+
+  .sb-item {
+    min-height: 44px;
+    padding: 10px 16px;
+    font-size: var(--text-sm);
+    display: inline-flex;
+    align-items: center;
+  }
+
+  .content { padding: 22px 18px 34px; }
+  .content p { max-width: none; line-height: 1.6; }
+
+  .btn {
+    min-height: 46px;
+    padding: 12px 18px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+  }
+
+  .btn-row { gap: 10px; }
+  .btn-row .btn { flex: 1 1 auto; }
+
+  /* project cards */
+  .pcard {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto;
+    gap: 12px;
+    padding: 12px;
+  }
+
+  .pcard .shot,
+  .pcard .shot-fallback {
+    width: 100%;
+    height: 150px;
+    object-position: top center;
+  }
+
+  .pcard .shot-fallback { font-size: 40px; }
+  .pcard .meta { display: none; }
+  .pcard-text p { max-width: none; }
+
+  /* disclosure tabs */
+  .webtab summary { min-height: 52px; padding: 14px 16px; }
+  .weblist li { padding: 10px 8px; }
+  .weblist a { flex-wrap: wrap; gap: 2px; }
+  .weblist b { white-space: normal; }
+  .weblist span { white-space: normal; overflow: visible; }
+  .weblist .live-link { padding: 6px 0; }
+
+  .sb-group > summary { min-height: 40px; padding: 10px 12px 6px; }
+
+  /* contact */
+  .contact-grid { grid-template-columns: 1fr; gap: 10px; }
+  .ccard { min-height: 60px; padding: 13px 14px; }
+
+  /* stats */
+  .stats { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  .stat { padding: 14px; }
+
+  /* narrative blocks */
+  .path li { padding-left: 46px; }
+  .quote { padding: 14px; }
+  .tag { padding: 6px 12px; }
+  .tags { gap: 8px; }
+
+  /* screenshot galleries */
+  .shots img { border-radius: 8px; }
+
+  /* résumé: the embedded PDF is unreadable on a phone, so lead with
+     the actions instead of a pinch-to-zoom document */
+  .pdfview { min-height: 300px; }
+  .pdfbar { flex-direction: column; align-items: stretch; gap: 10px; padding: 12px 14px 14px; }
+  .pdfbar-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .pdfbar-actions .btn { width: 100%; }
+
+  /* terminal */
+  .terminal { padding: 16px 14px; font-size: 12px; line-height: 1.65; }
+
+  /* popovers sit under a 46px bar now */
+  .popover { width: min(280px, calc(100vw - 16px)); }
+  .track { min-height: 44px; }
+}
+
+/* very small phones: keep the dock from crowding the window */
+@media (max-width: 380px) {
+  :root { --dock-icon: 48px; }
+  .window { height: calc(100vh - var(--menubar-h) - 100px) !important; }
+}
