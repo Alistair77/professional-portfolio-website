@@ -158,35 +158,6 @@ document.addEventListener("click", (e) => {
   card.closest(".win-body").querySelector(`.sb-item[data-pane="${card.dataset.pane}"]`)?.click();
 });
 
-/* ---------- terminal typing ---------- */
-const TYPE_MS = 16;
-document.addEventListener("app:open", (e) => {
-  if (e.detail !== "terminal") return;
-  const pre = document.querySelector('.window[data-app="terminal"] .terminal');
-  if (!pre || pre.dataset.typed) return;
-  pre.dataset.typed = "1";
-
-  const html = pre.innerHTML.trim();
-  pre.innerHTML = "";
-  if (matchMedia("(prefers-reduced-motion: reduce)").matches) {
-    pre.innerHTML = html;
-    return;
-  }
-
-  // type by token so tags land intact
-  const tokens = html.match(/<[^>]+>|[\s\S]/g) || [];
-  let i = 0;
-  const step = () => {
-    if (i >= tokens.length) return;
-    let chunk = "";
-    for (let n = 0; n < 3 && i < tokens.length; n++) chunk += tokens[i++];
-    pre.insertAdjacentHTML("beforeend", chunk);
-    pre.scrollTop = pre.scrollHeight;
-    setTimeout(step, TYPE_MS);
-  };
-  step();
-});
-
 /* ---------- keyboard shortcuts ----------
    These are advertised in the menus, so they have to actually work. */
 const SHORTCUTS = {

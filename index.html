@@ -49,6 +49,7 @@
   <p class="net-line"><span>Status</span><b id="net-status">—</b></p>
   <p class="net-line"><span>Latency</span><b id="net-ping">—</b></p>
   <p class="net-line"><span>Download</span><b id="net-speed">—</b></p>
+  <p class="net-note" id="net-note"></p>
   <button class="btn" id="net-run">Run test</button>
 </div>
 
@@ -331,26 +332,16 @@
   </div>
 </template>
 
-<template data-app="terminal" data-title="alistair — zsh — 80×24" data-width="680" data-height="400">
-  <pre class="terminal"><span class="u">alistair@cosmos</span>:<span class="p">~</span>$ whoami
-AI · Data · UX engineer. I build AI that ships.
-
-<span class="u">alistair@cosmos</span>:<span class="p">~</span>$ cat principles.txt
-<span class="c"># the short version</span>
-1. Retrieval problems wear a "the model is wrong" costume.
-2. If you can't measure it, you didn't improve it.
-3. Keep a human in front of the expensive actions.
-4. A pipeline nobody can steer is a demo, not a product.
-5. Ship it, then instrument it.
-
-<span class="u">alistair@cosmos</span>:<span class="p">~</span>$ ls ~/work
-ragstar/  agent-orchestrator/  agent-evals/
-hawkai/   quantasphere/        cosmos-portfolio/
-
-<span class="u">alistair@cosmos</span>:<span class="p">~</span>$ echo $EMAIL
-alistairar7@gmail.com
-
-<span class="u">alistair@cosmos</span>:<span class="p">~</span>$ <span class="caret"></span></pre>
+<template data-app="terminal" data-title="alistair@cosmos — zsh" data-width="720" data-height="440">
+  <div class="terminal" id="term">
+    <div class="term-out" id="term-out"></div>
+    <form class="term-line" id="term-form" autocomplete="off">
+      <label class="term-ps" for="term-in">alistair@cosmos:~$</label>
+      <input class="term-in" id="term-in" name="cmd" autocomplete="off"
+             autocapitalize="off" autocorrect="off" spellcheck="false"
+             aria-label="Terminal input">
+    </form>
+  </div>
 </template>
 
 <template data-app="contact" data-title="Get in touch" data-width="660" data-height="500">
@@ -399,5 +390,6 @@ alistairar7@gmail.com
 
 <script type="module" src="js/desktop.js"></script>
 <script type="module" src="js/statusbar.js"></script>
+<script type="module" src="js/terminal.js"></script>
 </body>
 </html>

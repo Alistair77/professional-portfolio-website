@@ -500,3 +500,10 @@ body.booting .desk-icons { opacity: 0; }
 
 .vol-row { display: flex; align-items: center; gap: 9px; margin-top: 9px; font-size: var(--text-sm); color: var(--muted-2); }
 .vol-row input { flex: 1; accent-color: var(--accent); }
+
+.net-note {
+  margin: 6px 0 0;
+  font-size: var(--text-xs);
+  line-height: 1.4;
+  color: var(--muted-3);
+}

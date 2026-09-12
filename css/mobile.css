@@ -173,3 +173,9 @@
   :root { --dock-icon: 48px; }
   .window { height: calc(100vh - var(--menubar-h) - 100px) !important; }
 }
+
+@media (max-width: 760px) {
+  .terminal { padding: 14px 12px; font-size: 12px; }
+  .term-ps { font-size: 11px; }
+  .term-in { font-size: 16px; } /* < 16px makes iOS zoom on focus */
+}
