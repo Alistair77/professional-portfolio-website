@@ -15,34 +15,50 @@
 
 <!-- ═══════════ boot greeting ═══════════ -->
 <div class="boot" id="boot">
+  <div class="boot-bg" aria-hidden="true"></div>
+  <svg class="boot-grain" aria-hidden="true">
+    <filter id="bootNoise"><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="4" /></filter>
+    <rect width="100%" height="100%" filter="url(#bootNoise)" />
+  </svg>
+
   <svg class="boot-mark" viewBox="0 0 420 200" role="img" aria-label="hello">
-    <path class="hello-path" pathLength="1" d="
-      M 50 150
-      C 52 120 58 70 66 46
-      C 70 32 82 32 80 50
-      C 76 84 70 120 72 150
-      C 74 122 84 100 102 100
-      C 118 100 124 122 122 150
-      C 120 132 128 100 148 100
-      C 164 100 166 120 146 128
-      C 128 136 120 142 126 152
-      C 132 162 152 158 160 146
-      C 174 110 186 62 188 42
-      C 190 28 178 28 178 46
-      C 178 82 186 126 192 146
-      C 196 158 208 158 214 148
-      C 228 112 240 64 242 44
-      C 244 30 232 30 232 48
-      C 232 84 240 128 246 148
-      C 250 160 262 160 268 150
-      C 276 130 280 100 300 100
-      C 318 100 326 118 318 136
-      C 310 154 290 158 286 146
-      C 282 134 296 118 314 120
-      C 332 122 344 132 356 144" />
+    <defs>
+      <!-- authored once, stroked three times: halo, glass body, specular edge -->
+      <path id="helloPath" pathLength="1" fill="none" d="
+        M 36 146
+        C 52 150 70 142 82 118
+        C 96 86 104 56 98 44
+        C 92 32 78 38 78 58
+        C 78 92 84 124 88 146
+        C 92 122 104 106 122 106
+        C 140 106 146 126 142 146
+        C 140 128 150 106 170 106
+        C 188 106 190 126 168 133
+        C 148 139 140 144 148 154
+        C 158 164 178 158 186 146
+        C 200 116 214 70 214 48
+        C 214 32 200 34 200 54
+        C 200 92 208 128 214 146
+        C 218 158 230 158 238 148
+        C 252 118 266 72 266 50
+        C 266 34 252 36 252 56
+        C 252 94 260 130 266 148
+        C 270 160 282 160 290 150
+        C 300 132 306 106 326 106
+        C 344 106 352 124 344 140
+        C 336 156 316 160 310 148
+        C 304 136 316 120 334 122
+        C 352 124 366 134 382 144" />
+      <filter id="helloHalo" x="-30%" y="-60%" width="160%" height="220%">
+        <feGaussianBlur stdDeviation="7" />
+      </filter>
+    </defs>
+
+    <use class="hp hp-halo" href="#helloPath" />
+    <use class="hp hp-body" href="#helloPath" />
+    <use class="hp hp-spec" href="#helloPath" />
   </svg>
 </div>
-
 
 <!-- ═══════════ menu bar ═══════════ -->
 <div class="menubar">

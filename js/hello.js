@@ -6,9 +6,9 @@
 
 const boot = document.getElementById("boot");
 
-const DRAW_MS = 2120;  // 320ms delay + 1800ms stroke
-const HOLD_MS = 420;   // let the finished word sit for a beat
-const FADE_MS = 700;   // matches the CSS transition
+const DRAW_MS = 1760;  // 260ms delay + 1500ms stroke
+const HOLD_MS = 340;   // let the finished word sit for a beat
+const FADE_MS = 620;   // matches the CSS transition
 
 let finished = false;
 

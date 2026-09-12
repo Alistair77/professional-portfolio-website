@@ -509,47 +509,93 @@ body.booting .desk-icons { opacity: 0; }
 }
 
 /* ---------- boot greeting ----------
-   An original hand-drawn script, stroked on with dash-offset. The desktop is
-   already built behind it; this only covers it until the greeting finishes. */
+   A grainy, blurred field with the word stroked on in white glass, then the
+   whole layer lifts away to reveal the desktop that was behind it all along.
+   Three strokes share one authored path: a soft halo, a translucent glass
+   body, and a bright specular edge. Together they read as frosted glass in a
+   way a single flat stroke cannot. */
 .boot {
   position: fixed;
   inset: 0;
   z-index: 9999;
   display: grid;
   place-items: center;
-  background: #000;
+  overflow: hidden;
+  background: #05070C;
   cursor: default;
-  transition: opacity 700ms var(--ease);
+  transition: opacity 620ms var(--ease), backdrop-filter 620ms var(--ease);
 }
 
-.boot.done { opacity: 0; pointer-events: none; }
+/* the blurred colour field — same palette as the wallpaper, so the hand-off
+   reads as a blur clearing rather than one image swapping for another */
+.boot-bg {
+  position: absolute;
+  inset: -25%;
+  background:
+    radial-gradient(38% 34% at 42% 28%, rgba(132, 112, 255, 0.62), transparent 70%),
+    radial-gradient(34% 30% at 72% 62%, rgba(72, 126, 240, 0.44), transparent 72%),
+    radial-gradient(40% 34% at 24% 72%, rgba(46, 132, 190, 0.34), transparent 74%),
+    linear-gradient(165deg, #121640 0%, #0A0D1E 55%, #05070C 100%);
+  filter: blur(58px);
+  animation: bootDrift 9s ease-in-out infinite alternate;
+}
+
+@keyframes bootDrift {
+  from { transform: scale(1) translate3d(0, 0, 0); }
+  to   { transform: scale(1.08) translate3d(-1.5%, 1%, 0); }
+}
+
+.boot-grain {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0.34;
+  mix-blend-mode: overlay;
+  pointer-events: none;
+}
 
 .boot-mark {
-  width: min(46vw, 340px);
+  position: relative;
+  width: clamp(250px, 42vw, 420px);
   height: auto;
   overflow: visible;
+  transition: transform 620ms var(--ease), opacity 620ms var(--ease), filter 620ms var(--ease);
 }
 
-.hello-path {
+.hp {
   fill: none;
-  stroke: #fff;
-  stroke-width: 9;
   stroke-linecap: round;
   stroke-linejoin: round;
-  /* pathLength="1" normalises the geometry, so one unit is the whole stroke */
+  /* pathLength="1" on the source path, so one unit is the whole stroke and the
+     draw stays identical at any rendered size */
   stroke-dasharray: 1;
   stroke-dashoffset: 1;
-  filter: drop-shadow(0 0 14px rgba(255, 255, 255, 0.28));
 }
 
-.boot.draw .hello-path {
-  animation: helloDraw 1800ms cubic-bezier(0.62, 0.03, 0.3, 1) 320ms forwards;
+.hp-halo { stroke: rgba(255, 255, 255, 0.34); stroke-width: 19; filter: url(#helloHalo); }
+.hp-body { stroke: rgba(255, 255, 255, 0.58); stroke-width: 9.5; }
+.hp-spec { stroke: rgba(255, 255, 255, 0.96); stroke-width: 3.2; transform: translate(-0.4px, -1.1px); }
+
+/* snappy: most of the stroke lands early, then eases into its finish */
+.boot.draw .hp {
+  animation: helloDraw 1500ms cubic-bezier(0.22, 0.68, 0.16, 1) 260ms forwards;
 }
 
 @keyframes helloDraw { to { stroke-dashoffset: 0; } }
 
-/* reduced motion: present the greeting, just do not animate the stroke on */
+/* the lift-away: the mark scales up a touch and softens as the layer fades,
+   so it feels like it recedes rather than simply switching off */
+.boot.done { opacity: 0; pointer-events: none; }
+.boot.done .boot-mark { transform: scale(1.06); opacity: 0; filter: blur(6px); }
+
+@media (max-width: 760px) {
+  .boot-mark { width: min(76vw, 340px); }
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .hello-path { stroke-dashoffset: 0; }
-  .boot.draw .hello-path { animation: none; }
+  .hp { stroke-dashoffset: 0; }
+  .boot.draw .hp { animation: none; }
+  .boot-bg { animation: none; }
+  .boot.done .boot-mark { transform: none; filter: none; }
 }
