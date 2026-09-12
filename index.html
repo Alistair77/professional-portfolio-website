@@ -13,6 +13,37 @@
 </head>
 <body class="booting">
 
+<!-- ═══════════ boot greeting ═══════════ -->
+<div class="boot" id="boot">
+  <svg class="boot-mark" viewBox="0 0 420 200" role="img" aria-label="hello">
+    <path class="hello-path" pathLength="1" d="
+      M 50 150
+      C 52 120 58 70 66 46
+      C 70 32 82 32 80 50
+      C 76 84 70 120 72 150
+      C 74 122 84 100 102 100
+      C 118 100 124 122 122 150
+      C 120 132 128 100 148 100
+      C 164 100 166 120 146 128
+      C 128 136 120 142 126 152
+      C 132 162 152 158 160 146
+      C 174 110 186 62 188 42
+      C 190 28 178 28 178 46
+      C 178 82 186 126 192 146
+      C 196 158 208 158 214 148
+      C 228 112 240 64 242 44
+      C 244 30 232 30 232 48
+      C 232 84 240 128 246 148
+      C 250 160 262 160 268 150
+      C 276 130 280 100 300 100
+      C 318 100 326 118 318 136
+      C 310 154 290 158 286 146
+      C 282 134 296 118 314 120
+      C 332 122 344 132 356 144" />
+  </svg>
+</div>
+
+
 <!-- ═══════════ menu bar ═══════════ -->
 <div class="menubar">
   <button class="mb-item mb-mark" data-menu="m-system" aria-expanded="false" aria-label="AR7 — main menu"><span class="mark-ar">AR</span><span class="mark-7">7</span></button>
@@ -388,6 +419,7 @@
   </div>
 </template>
 
+<script type="module" src="js/hello.js"></script>
 <script type="module" src="js/desktop.js"></script>
 <script type="module" src="js/statusbar.js"></script>
 <script type="module" src="js/terminal.js"></script>

@@ -507,3 +507,49 @@ body.booting .desk-icons { opacity: 0; }
   line-height: 1.4;
   color: var(--muted-3);
 }
+
+/* ---------- boot greeting ----------
+   An original hand-drawn script, stroked on with dash-offset. The desktop is
+   already built behind it; this only covers it until the greeting finishes. */
+.boot {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: grid;
+  place-items: center;
+  background: #000;
+  cursor: default;
+  transition: opacity 700ms var(--ease);
+}
+
+.boot.done { opacity: 0; pointer-events: none; }
+
+.boot-mark {
+  width: min(46vw, 340px);
+  height: auto;
+  overflow: visible;
+}
+
+.hello-path {
+  fill: none;
+  stroke: #fff;
+  stroke-width: 9;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  /* pathLength="1" normalises the geometry, so one unit is the whole stroke */
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  filter: drop-shadow(0 0 14px rgba(255, 255, 255, 0.28));
+}
+
+.boot.draw .hello-path {
+  animation: helloDraw 1800ms cubic-bezier(0.62, 0.03, 0.3, 1) 320ms forwards;
+}
+
+@keyframes helloDraw { to { stroke-dashoffset: 0; } }
+
+/* reduced motion: present the greeting, just do not animate the stroke on */
+@media (prefers-reduced-motion: reduce) {
+  .hello-path { stroke-dashoffset: 0; }
+  .boot.draw .hello-path { animation: none; }
+}

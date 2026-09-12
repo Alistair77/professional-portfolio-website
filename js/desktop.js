@@ -179,9 +179,23 @@ addEventListener("keydown", (e) => {
   if (fn) { e.preventDefault(); fn(); }
 });
 
-/* ---------- boot ---------- */
-addEventListener("load", () => {
-  requestAnimationFrame(() => document.body.classList.remove("booting"));
+/* ---------- boot ----------
+   Waits for the greeting to finish rather than for `load`, so the menu bar,
+   dock and first window arrive as the greeting fades instead of behind it. */
+let started = false;
+
+function startDesktop() {
+  if (started) return;
+  started = true;
+  // not requestAnimationFrame: it never fires while the tab is in the
+  // background, which would leave the chrome at opacity 0 until first focus
+  setTimeout(() => document.body.classList.remove("booting"), 0);
   const first = new URLSearchParams(location.search).get("app") || "about";
-  setTimeout(() => openApp(first), 620);
-});
+  setTimeout(() => openApp(first), 420);
+}
+
+document.addEventListener("boot:ready", startDesktop, { once: true });
+
+/* Safety net: if the greeting module fails to load or throws, the desktop must
+   still appear rather than sitting behind a black screen forever. */
+setTimeout(startDesktop, 6000);
