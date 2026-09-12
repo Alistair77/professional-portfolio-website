@@ -54,9 +54,13 @@
       </filter>
     </defs>
 
-    <use class="hp hp-halo" href="#helloPath" />
-    <use class="hp hp-body" href="#helloPath" />
-    <use class="hp hp-spec" href="#helloPath" />
+    <!-- a shear is how oblique letterforms actually work, so the whole hand
+         leans together; the translate re-centres what the shear pushes left -->
+    <g transform="translate(20 0) skewX(-11)">
+      <use class="hp hp-halo" href="#helloPath" />
+      <use class="hp hp-body" href="#helloPath" />
+      <use class="hp hp-spec" href="#helloPath" />
+    </g>
   </svg>
 </div>
 
