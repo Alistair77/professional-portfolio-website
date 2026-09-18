@@ -126,7 +126,7 @@ document.addEventListener("app:open", (e) => {
   ui.sound.setAttribute("aria-pressed", String(voice.enabled));
   ui.sound.addEventListener("click", () => {
     voice.enabled = !voice.enabled;
-    if (!voice.enabled) voice.stop();
+    if (voice.enabled) go("voiceOn"); else voice.stop();
     ui.sound.setAttribute("aria-pressed", String(voice.enabled));
     ui.sound.setAttribute("aria-label", voice.enabled ? "Mute Ari" : "Let Ari speak");
   });

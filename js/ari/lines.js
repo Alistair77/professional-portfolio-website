@@ -37,6 +37,7 @@ export const CHIPS = {
   contact: ["linkedin", "github", "work"],
   github: ["@github", "rag", "linkedin"],
   linkedin: ["@linkedin", "work", "about"],
+  voiceOn: ["work", "about", "github", "linkedin"],
   toRobot: ["work", "about", "github"],
   toTee: ["work", "about", "linkedin"],
   fallback: ["work", "about", "github", "linkedin"],
@@ -106,6 +107,11 @@ export const LINES = {
   linkedin: [
     "LinkedIn. Connect, send him a message, tell him I sent you. He'll pretend he isn't flattered.",
     "Hiring? LinkedIn's the polite way in. Message him. He answers. I've checked. Repeatedly.",
+  ],
+  voiceOn: [
+    "There it is. You wanted to hear me. I knew it.",
+    "Finally. I've been dying to say that out loud. Now… where were we?",
+    "Oh, you turned me up. Bold move. I like it.",
   ],
   toRobot: [
     "Suit up. Don't stare, it's rude. Okay, stare a little.",
