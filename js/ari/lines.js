@@ -41,17 +41,19 @@ export const CHIPS = {
   toRobot: ["work", "about", "github"],
   toTee: ["work", "about", "linkedin"],
   fallback: ["work", "about", "github", "linkedin"],
+  hint: ["work", "about", "github"],
+  more: ["work", "github", "contact"],
 };
 
-/* which Projects pane a line points at */
+/* which Projects pane a line points at (null: open Projects, keep its pane) */
 export const PANE = {
   work: "all", rag: "ragstar", zetsu: "zetsu", orchestrator: "orchestrator",
-  evals: "evals", cache: "semantic-cache",
+  evals: "evals", cache: "semantic-cache", hint: null,
 };
 
 /* clicking a pane in the Projects window → which line Ari answers with */
 export const PANE_NODE = {
-  ragstar: "rag", zetsu: "zetsu", orchestrator: "orchestrator", evals: "evals",
+  all: "work", ragstar: "rag", zetsu: "zetsu", orchestrator: "orchestrator", evals: "evals",
   "semantic-cache": "cache", aapl: "other", "study-snipp": "other", "health-weight": "other",
 };
 
@@ -126,7 +128,53 @@ export const LINES = {
   fallback: [
     "I don't know that one. In the real build, a live model answers from Alistair's work. For now, pick a button.",
   ],
+  /* said once, when Projects first sits beside Ari as a list */
+  hint: [
+    "Want the long version? Hit the green button, next to the yellow one. I'll wait. I'm excellent at waiting.",
+    "Psst. The green one, beside the yellow. That's where the details live. I'd press it myself, but no hands. Tragic, really.",
+    "Want more? Green button, next to the yellow. Everything's in there. Almost everything. I kept the best bits for myself.",
+  ],
 };
+
+/* the green button opened Projects out: the long version, by pane */
+export const MORE = {
+  work: [
+    "The full catalogue. Five AI systems up top, then data, mobile, and a drawer of web projects he's a little shy about. Click any card. I'll narrate.",
+    "Everything he's shipped, in one window. The AI work leads, because it's the point. The rest is range. Pick one and I'll talk you through it.",
+  ],
+  rag: [
+    "The long version. Vector search and keyword search run side by side, a reranker keeps only the best, and every answer cites its source. Can't answer? It refuses, and never even calls the model. Principled. I find that attractive.",
+    "All of it, then. No API keys, nothing leaves your machine, and every retrieval stage is on screen in its own colour. The demo runs the real pipeline right in your browser. Show-off. I approve.",
+  ],
+  zetsu: [
+    "Here's the rest. Say the wake word once and it keeps listening. Real echo cancellation, so it never interrupts itself. Anything risky gets stopped and asked about first. Polite and paranoid. My favourite combination.",
+    "The details. Text agent first, voice layered on top, so the logic never forks. There's even a self-test that runs with no mic, no model and no network. Built to be debugged. More than most of us can say.",
+  ],
+  orchestrator: [
+    "The full story. The model can only ask for an action. The harness decides, runs it, and writes it down. Every step is replayable months later. No mysteries. Honestly, I find that a little unsettling.",
+    "Longer version. Typed tools, Redis for memory, and an append-only Postgres log of every decision. Dangerous paths wait for a human. Autonomy where it's cheap, a person where it isn't. Sensible. Annoyingly so.",
+  ],
+  evals: [
+    "The long version. It clusters real conversations, has a judge write golden answers, then scores every new version on correctness, groundedness and safety. If version two got worse at maths, it knows. Ruthless. I love it.",
+    "Everything? Fine. Scores land in DuckDB, and a Streamlit dashboard shows which clusters are failing and the exact cases behind them. Nowhere to hide. Not even for me.",
+  ],
+  cache: [
+    "All of it. Every prompt gets embedded and checked against a FAISS index. Close enough in meaning, and the saved answer comes straight back, no model call. It even refuses to cache agent runs, because those change things. Discipline. Rare. Attractive.",
+    "The details. Entries expire on a timer, and it reports hit rate, latency, and the money it saved you. It keeps receipts. A cache after my own heart.",
+  ],
+  other: [
+    "That's the whole write-up. Shorter than the others. Not every project needs an essay. Some of us just have range.",
+  ],
+};
+
+/* hovering the menu-bar orb or the dock icon: a small face, an invitation */
+export const PEEK = [
+  "Hi. Wanna talk? Click. I'm much better company than an icon.",
+  "Oh, hi. Wanna talk? One click. I'm told I'm worth it.",
+  "Hovering's cute. Clicking's braver. Wanna talk?",
+  "Hi. Wanna talk? Click, and I'll tell you everything. Well. Almost everything.",
+  "Wanna talk? Click. I don't bite. Rarely.",
+];
 
 export function greeting() {
   const h = new Date().getHours();
@@ -144,6 +192,7 @@ export const ROUTES = [
   [/orchestr|langgraph|plan|reflect|human.in/i, "orchestrator"],
   [/eval|regress|judge|dashboard/i, "evals"],
   [/cache|faiss|repeat/i, "cache"],
+  [/long version|details?\b|expand|green button|see more/i, "hint"],
   [/work|project|built|build|portfolio|agent/i, "work"],
   [/contact|email|reach|mail/i, "contact"],
   [/who|about|alistair|background|study|education|msc|strathclyde/i, "about"],

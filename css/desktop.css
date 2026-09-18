@@ -408,7 +408,8 @@ body.booting .desk-icons { opacity: 0; }
 @media (max-width: 760px) {
   .desk-icons { display: none; }
   .dock { gap: 6px; padding: 6px 9px 10px; --dock-icon: 46px; }
-  .mb-hide { display: none; }
+  /* .menubar so it outranks .mb-icon and .mb-right svg, which set display */
+  .menubar .mb-hide { display: none; }
   .mb-clock { min-width: 0; }
 }
 

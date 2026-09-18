@@ -2,10 +2,10 @@
    data-app="ari">), talks in scripted lines, points at the Projects window,
    and explains whichever project the visitor picks there. */
 
-import { openApp } from "../wm.js";
+import { openApp, focusWindow, besideAri } from "../wm.js";
 import { createFigure } from "./figure.js";
 import { voice } from "./voice.js";
-import { LINES, CHIPS, LABEL, LINKS, PANE, PANE_NODE, ROUTES, greeting } from "./lines.js";
+import { LINES, CHIPS, LABEL, LINKS, PANE, PANE_NODE, ROUTES, MORE, greeting } from "./lines.js";
 
 const RM = matchMedia("(prefers-reduced-motion: reduce)").matches;
 const clamp = (v, a = -1, b = 1) => Math.max(a, Math.min(b, v));
@@ -15,27 +15,46 @@ const esc = (s) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;");
 const pointer = { x: innerWidth / 2, y: innerHeight / 2, moved: 0 };
 addEventListener("pointermove", (e) => { pointer.x = e.clientX; pointer.y = e.clientY; pointer.moved = performance.now(); });
 
+const LIST_W = 320; // Projects as a narrow list beside Ari, like the concept
+
 let win = null, fig = null, canvas = null, ui = null;
 let body = "tee", running = false, level = 0;
 let born = 0, bodyBorn = 0, blinkAt = 0;
-let gaze = null, gazeUntil = 0, token = 0, full = "", selfNav = false;
+let gaze = null, gazeUntil = 0, token = 0, full = "", selfNav = false, hinted = false;
+
+/* the menu-bar orb and the dock icon pulse while Ari talks */
+const pulse = [document.querySelector("#ari-orb .orb"), document.querySelector(".dock .glyph-ari")].filter(Boolean);
+
+const projectsWin = () => document.querySelector('.window[data-app="projects"]');
+/* narrow Projects hides its detail pane (css/ari.css) until the green button opens it out */
+const isList = (pw) => !!pw && !pw.hidden && getComputedStyle(pw.querySelector(".content")).display === "none";
 
 /* ── talking ── */
 function go(id, { fromPanel = false } = {}) {
   if (!ui) return;
-  const text = id === "start" ? greeting() : pick(LINES[id]);
+  const points = Object.hasOwn(PANE, id);
+  if (points && !fromPanel) showProject(PANE[id]);
+  let text = id === "start" ? greeting() : pick(LINES[id]);
+  if (id === "hint") hinted = true;
+  else if (!hinted && (points || id === "other") && isList(projectsWin())) {
+    text += " " + pick(LINES.hint);
+    hinted = true;
+  }
+  say(text, CHIPS[id]);
+}
+
+function say(text, chips) {
   const my = ++token;
   ui.prev.textContent = full;
   full = text;
   ui.chips.innerHTML = "";
   voice.say(text, RM);
-  if (!fromPanel && PANE[id]) showProject(PANE[id]);
 
   const done = () => {
     if (my !== token || !ui) return;
     ui.line.innerHTML = esc(text) + '<span class="caret"></span>';
     ui.chips.innerHTML = "";
-    CHIPS[id].forEach((c, i) => {
+    chips.forEach((c, i) => {
       let el;
       if (LINKS[c]) {
         el = document.createElement("a");
@@ -61,20 +80,35 @@ function go(id, { fromPanel = false } = {}) {
   step();
 }
 
-/* open the real Projects window at the right pane, and glance at it */
+/* open the real Projects window beside Ari (never over it), at the right pane */
 function showProject(pane) {
-  openApp("projects");
-  const pw = document.querySelector('.window[data-app="projects"]');
+  const pw = openApp("projects");
   if (!pw) return;
-  if (pane !== "all") {
+  if (pane) {
     selfNav = true;
     pw.querySelector(`.sb-item[data-pane="${pane}"]`)?.click();
     selfNav = false;
   }
-  const r = pw.getBoundingClientRect();
+  if (besideAri(pw, LIST_W)) focusWindow(win); // phones stack windows: Projects stays in front
+  glance(pw);
+}
+
+function glance(el) {
+  const r = el.getBoundingClientRect();
   gaze = { x: r.left + r.width / 2, y: r.top + r.height / 3 };
   gazeUntil = performance.now() + 2400;
 }
+
+/* the green button opened Projects out: Ari gives the long version */
+document.addEventListener("app:zoom", (e) => {
+  const { id, on } = e.detail;
+  const pw = projectsWin();
+  if (id !== "projects" || !on || !ui || !pw) return;
+  hinted = true;
+  const pane = pw.querySelector('.sb-item[aria-selected="true"]')?.dataset.pane;
+  say(pick(MORE[PANE_NODE[pane]] || MORE.work), CHIPS.more);
+  glance(pw);
+});
 
 /* the visitor picks a project in the Projects window → Ari explains it */
 document.addEventListener("click", (e) => {
@@ -100,6 +134,7 @@ document.addEventListener("app:open", (e) => {
   born = bodyBorn = performance.now();
   blinkAt = born + 2400;
   full = "";
+  hinted = false;
 
   win.querySelector(".d-ask").addEventListener("submit", (ev) => {
     ev.preventDefault();
@@ -138,17 +173,26 @@ document.addEventListener("app:open", (e) => {
 document.addEventListener("app:close", (e) => {
   if (e.detail !== "ari") return;
   voice.stop();
+  for (const el of pulse) el.style.transform = "";
   win = fig = canvas = ui = null;
+  /* without Ari the list has nobody to explain it: Projects gets its full size back */
+  const pw = projectsWin();
+  if (isList(pw)) {
+    pw.style.width = pw.style.height = "";
+    pw.style.left = Math.max(14, Math.min(pw.offsetLeft, innerWidth - pw.offsetWidth - 14)) + "px";
+  }
 });
 
 /* ── animation: only runs while the window exists ── */
 function loop(t) {
   if (!win || !win.isConnected) { running = false; return; }
   requestAnimationFrame(loop);
-  if (win.hidden) return; // minimised
 
   const target = voice.speaking() ? 0.35 + 0.55 * Math.abs(Math.sin(t / 55)) * (0.6 + 0.4 * Math.sin(t / 140)) : 0;
   level += (target - level) * 0.2;
+  const s = level > 0.01 ? `scale(${(1 + level * 0.3).toFixed(3)})` : "";
+  for (const el of pulse) el.style.transform = s;
+  if (win.hidden) return; // minimised: the orb still pulses, the figure rests
 
   const r = canvas.getBoundingClientRect();
   const cx = r.left + r.width / 2, cy = r.top + r.height * 0.36;

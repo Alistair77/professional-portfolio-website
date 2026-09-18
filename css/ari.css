@@ -1,5 +1,15 @@
 /* Ari — the desktop assistant window. */
 
+:root {
+  --ari-orb: radial-gradient(circle at 38% 32%, #fff 0, #8FE3FF 24%, #8B6BFF 62%, #FF6FB5 100%);
+  --ari-night: radial-gradient(120% 140% at 18% 45%, #2E3268 0%, #181B3A 55%, #0F1126 100%);
+  --ari-violet: #9C96FF;
+}
+
+/* sized here: wm.js applies the template's data-width/height without units,
+   so no window's template size has ever taken effect */
+.window[data-app="ari"] { width: 640px; height: 480px; }
+
 .window[data-app="ari"] .win-body {
   background: radial-gradient(90% 80% at 72% 40%, #2E3268 0%, #181B3A 55%, #0F1126 100%);
 }
@@ -45,8 +55,93 @@
 .ari-fig { position: relative; display: flex; align-items: flex-end; justify-content: center; min-height: 0; overflow: hidden; }
 .ari-fig canvas { height: 100%; width: auto; max-width: 100%; aspect-ratio: 310 / 412; display: block; }
 
-/* the dock icon */
-.dock .glyph-ari { background: radial-gradient(circle at 38% 32%, #fff 0, #8FE3FF 24%, #8B6BFF 62%, #FF6FB5 100%); }
+/* the dock icon, and the orb beside the battery */
+.dock .glyph-ari { background: var(--ari-orb); }
+.dock-item.peeking::after { opacity: 0; } /* the face card replaces the tooltip */
+
+.mb-ari .orb {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--ari-orb);
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.12), 0 0 9px rgba(139, 107, 255, 0.55);
+  transition: box-shadow var(--dur) var(--ease);
+}
+.mb-ari:hover .orb,
+.mb-ari.peeking .orb,
+.mb-ari[aria-pressed="true"] .orb { box-shadow: 0 0 0 2px rgba(156, 150, 255, 0.6), 0 0 14px rgba(139, 107, 255, 0.9); }
+
+/* ── the face card on hover ── */
+.ari-peek {
+  position: fixed;
+  z-index: 960;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 290px;
+  padding: 10px 16px 10px 10px;
+  border-radius: 18px;
+  background: var(--ari-night);
+  border: 1px solid rgba(156, 150, 255, 0.34);
+  box-shadow: var(--shadow-pop), 0 0 28px rgba(139, 107, 255, 0.22);
+  color: #fff;
+  cursor: pointer;
+  animation: peekIn 240ms var(--ease) both;
+}
+.ari-peek[hidden] { display: none; }
+.ari-peek[data-from="top"] { --peek-dy: -6px; transform-origin: 50% 0; }
+.ari-peek[data-from="bottom"] { --peek-dy: 6px; transform-origin: 50% 100%; }
+@keyframes peekIn { from { opacity: 0; transform: translateY(var(--peek-dy)) scale(0.96); } }
+
+.ari-peek canvas {
+  flex: 0 0 auto;
+  width: 64px;
+  height: 76px;
+  -webkit-mask-image: linear-gradient(#000 78%, transparent);
+  mask-image: linear-gradient(#000 78%, transparent);
+}
+.peek-line { margin: 0; min-height: calc(1.35em * 3); font-size: 13px; line-height: 1.35; font-weight: 500; text-wrap: pretty; }
+.peek-cta { margin: 5px 0 0; font-size: 10px; font-weight: 650; letter-spacing: 0.1em; text-transform: uppercase; color: #B9B5FF; transition: color var(--dur-fast) var(--ease); }
+.ari-peek:hover .peek-cta { color: #fff; }
+
+/* ── Projects beside Ari ──
+   Ari opens Projects as a narrow list, like the concept; the green button
+   opens it out to the full write-up. Derived from width, nothing to sync. */
+.sb-dot, .sb-item small { display: none; }
+
+@media (min-width: 761px) {
+  .window[data-app="projects"] { container: projects / inline-size; }
+
+  @container projects (max-width: 400px) {
+    .win-body .content { display: none; }
+    .win-body .sidebar { flex: 1 1 auto; box-shadow: none; }
+    .sidebar .sb-item { gap: 10px; padding: 7px 9px; }
+    .sidebar .sb-item span { display: grid; gap: 1px; }
+    .sidebar .sb-dot { display: block; flex: 0 0 auto; width: 20px; height: 20px; border-radius: 6px; background: linear-gradient(160deg, #59D0FF, #1478E8); box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25); }
+    .sidebar .sb-item small { display: block; font-size: var(--text-xs); color: var(--muted-2); }
+    .sidebar .sb-item[aria-selected="true"] small { color: rgba(255, 255, 255, 0.78); }
+    .sidebar::after { content: "Pick one and Ari will tell you about it."; display: block; padding: 12px 9px 4px; font-size: var(--text-xs); color: var(--muted-2); }
+
+    /* the green button is the way in: all three keep their colour, and it says hello */
+    .titlebar .traffic button.tl-close { background: var(--tl-red); }
+    .titlebar .traffic button.tl-min { background: var(--tl-yellow); }
+    .titlebar .traffic button.tl-max { background: var(--tl-green); }
+    .titlebar .traffic .tl-max::before {
+      content: "";
+      position: absolute;
+      inset: -4px;
+      border-radius: 50%;
+      border: 2px solid var(--tl-green);
+      opacity: 0;
+      animation: tl-nudge 1.8s var(--ease) 0.6s 4;
+    }
+  }
+}
+
+@keyframes tl-nudge {
+  from { opacity: 0.9; transform: scale(0.6); }
+  to { opacity: 0; transform: scale(1.5); }
+}
 
 @media (max-width: 760px) {
   .ari-body { grid-template-columns: 1fr; grid-template-rows: minmax(0, 44%) auto; }

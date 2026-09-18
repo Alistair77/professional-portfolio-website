@@ -126,145 +126,171 @@ vol?.addEventListener("input", () => { if (audio) audio.volume = vol.value / 100
 paintList();
 
 /* ---------- network ----------
-   A real measurement, done the way a speed test actually has to be done.
+   A real measurement of the visitor's own connection, done the way a speed
+   test actually has to be done.
+
+   It runs against Cloudflare's public speed-test edge (the endpoints
+   speed.cloudflare.com itself uses), not against whatever served this page:
+   timing the page's own host measures localhost in development and one CDN
+   in production, and a static host cannot accept an upload at all. The edge
+   sends Access-Control-Allow-Origin and Timing-Allow-Origin, so the browser
+   exposes full Resource Timing for every request.
 
    The naive version (bytes / total fetch time) is wrong: the fetch window is
-   dominated by DNS + TCP + TLS + time-to-first-byte. Measured on this host,
+   dominated by DNS + TCP + TLS + time-to-first-byte. Measured on this site,
    TTFB was 71% of the window — reporting 1.5 Mbps while the bytes were moving
    at 5.4 Mbps, with five identical runs varying 3x.
 
-   So: Resource Timing for the true transfer window, wire bytes rather than
-   decoded bytes, a warmed connection, parallel streams, and a hard cap on how
-   much of the visitor's data this is allowed to spend.                      */
+   So: Resource Timing for the true transfer window, a warmed connection,
+   parallel streams, escalation only while a sample is too quick to trust, and
+   a hard cap on how much of the visitor's data this is allowed to spend.   */
 
 const netBtn = document.getElementById("net-btn");
 const netPop = document.getElementById("net-pop");
 register(netBtn, netPop);
 
-const PROBE = "assets/projects/rag_stages.png"; // 283 KB, same origin
+const EDGE = "https://speed.cloudflare.com";
 const MIN_WINDOW_MS = 220;     // below this the sample is noise
-const MAX_BYTES = 1_600_000;   // never spend more than ~1.6 MB of someone's data
+const DOWN_STEPS = [[3, 200_000], [5, 200_000]]; // [streams, bytes each]: 0.6 MB, then 1 MB more
+const UP_STEPS = [200_000, 800_000];             // one upload each; sent bytes cost data too
+const MAX_BYTES = 2_600_000;   // never spend more than ~2.6 MB of someone's data
 const REQ_TIMEOUT_MS = 8000;   // a hung request must not hang the panel
-const STREAMS = [3, 6];        // escalate only while inside the data budget
 const STALE_AFTER_MS = 120_000;
 
 const $ = (id) => document.getElementById(id);
+const NET_FIGURES = ["net-ping", "net-speed", "net-up"];
 
 let bust = 0;
 let spent = 0;      // everything this run has cost the visitor, for display
-let spentBulk = 0;  // throughput only — latency probes must not starve it
 let lastRun = 0;
-const url = (p) => `${p}?n=${++bust}-${performance.now() | 0}`;
+let colo = "";      // which Cloudflare edge answered, e.g. "LHR"
+const nonce = () => `r=${++bust}-${performance.now() | 0}`;
+const down = (bytes) => `${EDGE}/__down?bytes=${bytes}&${nonce()}`;
+const up = () => `${EDGE}/__up?${nonce()}`;
 
-function timingFor(href) {
-  return performance.getEntriesByName(new URL(href, location.href).href).pop() || null;
-}
+const timingFor = (href) => performance.getEntriesByName(href).pop() || null;
 
-async function fetchTimed(path) {
-  const u = url(path);
+/* one request, drained, bounded by a timeout; resolves to its timing entry */
+async function timed(u, init = {}) {
   const ctl = new AbortController();
   const timer = setTimeout(() => ctl.abort(), REQ_TIMEOUT_MS);
   try {
-    const res = await fetch(u, { cache: "no-store", signal: ctl.signal });
-    // Without this, renaming the probe asset yields a 404 page that still has
-    // a size and a duration — a confident, completely wrong reading.
+    const res = await fetch(u, { cache: "no-store", ...init, signal: ctl.signal });
+    // An error page still has a size and a duration — a confident, completely
+    // wrong reading — so anything but success is a failed sample.
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     await res.arrayBuffer(); // drain, or responseEnd is meaningless
-    const t = timingFor(u);
-    if (!t) return null;
-
-    // transferSize === 0 on a same-origin request means it was served from the
-    // browser cache: nothing crossed the network, so the sample says nothing
-    // about the link. Falling back to the body size here would invent speed.
-    const wire = t.transferSize;
-    if (!wire) return null;
-
-    spent += wire;
-    spentBulk += wire;
-    return { start: t.responseStart, end: t.responseEnd, bytes: wire };
+    colo ||= res.headers.get("cf-meta-colo") || "";
+    return timingFor(u);
   } finally {
     clearTimeout(timer);
   }
 }
 
-/* Latency: TTFB (responseStart - requestStart) is RTT plus server time. The
-   minimum across a few tries is the closest thing to the true round trip —
-   everything above the floor is jitter. Sub-millisecond is valid on a fast
-   link, so 0 must be accepted rather than treated as failure. */
+/* Latency: TTFB (responseStart - requestStart) is RTT plus server time, taken
+   on an empty download. The minimum across a few tries is the closest thing
+   to the true round trip — everything above the floor is jitter. The first
+   try also warms DNS, TCP and TLS for everything after it. Sub-millisecond is
+   valid on a fast link, so 0 must be accepted rather than treated as failure. */
 async function measureLatency(tries = 3) {
   const seen = [];
   for (let i = 0; i < tries; i++) {
     try {
-      const u = url(PROBE);
-      const ctl = new AbortController();
-      const timer = setTimeout(() => ctl.abort(), REQ_TIMEOUT_MS);
+      const u = down(0);
       const started = performance.now();
-      // Only the first byte is needed for a round trip, so ask for exactly
-      // that. Servers honouring Range reply 206 with one byte; those that do
-      // not simply send the file, which still yields a valid TTFB.
-      const res = await fetch(u, {
-        cache: "no-store", signal: ctl.signal, headers: { Range: "bytes=0-0" },
-      });
-      clearTimeout(timer);
-      if (!res.ok) continue;
-
-      // Latency needs the headers, not the payload. If the server honoured
-      // Range this is one byte; if it ignored it (status 200) cancel the body
-      // rather than downloading the whole file to time a round trip.
-      if (res.status === 206) await res.arrayBuffer();
-      else { try { await res.body?.cancel(); } catch { /* already drained */ } }
-
-      const t = timingFor(u);
+      const t = await timed(u);
       if (t) spent += t.transferSize || 0;
-
-      // responseStart is set as soon as headers land, so it survives the
-      // cancel; fall back to the wall clock if the entry never materialised.
       const ttfb = t && t.responseStart > 0
         ? t.responseStart - t.requestStart
         : performance.now() - started;
       if (Number.isFinite(ttfb) && ttfb >= 0) seen.push(ttfb);
     } catch { /* a failed try simply contributes no sample */ }
   }
-  return seen.length ? Math.round(Math.min(...seen)) : null;
+  return seen.length ? Math.min(...seen) : null;
 }
 
-async function measureThroughput() {
-  performance.clearResourceTimings();
-  await fetchTimed(PROBE).catch(() => {}); // warm: DNS, TCP, TLS, partial slow-start
-
+/* Download: parallel streams, timed from the first response byte to the last. */
+async function measureDownload() {
   let best = null;
-  for (const streams of STREAMS) {
-    if (spentBulk + streams * 290_000 > MAX_BYTES) break; // stay inside the budget
+  for (const [streams, bytes] of DOWN_STEPS) {
+    if (spent + streams * bytes > MAX_BYTES) break; // stay inside the budget
 
-    const runs = (await Promise.all(
-      Array.from({ length: streams }, () => fetchTimed(PROBE).catch(() => null))
-    )).filter((r) => r && r.bytes > 0);
+    const runs = (await Promise.all(Array.from({ length: streams }, () =>
+      timed(down(bytes)).then((t) => t && {
+        start: t.responseStart,
+        end: t.responseEnd,
+        // no-store on a unique URL cannot be a cache hit, so when a browser
+        // withholds transferSize the requested size is what crossed the wire
+        bytes: t.transferSize || t.encodedBodySize || bytes,
+      }).catch(() => null)
+    ))).filter((r) => r && r.bytes > 0 && r.start > 0);
     if (!runs.length) continue;
 
-    const bytes = runs.reduce((n, r) => n + r.bytes, 0);
+    const got = runs.reduce((n, r) => n + r.bytes, 0);
+    spent += got;
     const windowMs = Math.max(...runs.map((r) => r.end)) - Math.min(...runs.map((r) => r.start));
     if (windowMs <= 0) continue;
 
-    best = { mbps: (bytes * 8) / (windowMs / 1000) / 1e6, bytes, windowMs, streams };
+    best = { mbps: (got * 8) / (windowMs / 1000) / 1e6, windowMs };
     if (windowMs >= MIN_WINDOW_MS) break;
+  }
+  return best;
+}
+
+/* random bytes, so nothing between here and the edge can compress them away */
+function noise(n) {
+  const b = new Uint8Array(n);
+  for (let i = 0; i < n; i += 65_536) crypto.getRandomValues(b.subarray(i, i + 65_536));
+  return b;
+}
+
+/* Upload: the body goes out between requestStart and the first response byte,
+   which also holds one round trip — so the measured latency is taken off. */
+async function measureUpload(rtt) {
+  let best = null;
+  for (const bytes of UP_STEPS) {
+    if (spent + bytes > MAX_BYTES) break;
+    try {
+      const u = up();
+      const started = performance.now();
+      const t = await timed(u, { method: "POST", body: noise(bytes) });
+      spent += bytes;
+      const total = t && t.responseStart > 0
+        ? t.responseStart - t.requestStart
+        : performance.now() - started;
+      const windowMs = total - (rtt || 0);
+      if (!(windowMs > 0)) continue;
+      best = { mbps: (bytes * 8) / (windowMs / 1000) / 1e6, windowMs };
+      if (windowMs >= MIN_WINDOW_MS) break;
+    } catch (err) {
+      if (err && err.name === "AbortError") throw err; // a stall is a result, not a skip
+    }
   }
   return best;
 }
 
 function clearFigures(status) {
   $("net-status").textContent = status;
-  $("net-ping").textContent = "—";
-  $("net-speed").textContent = "—";
+  for (const id of NET_FIGURES) $(id).textContent = "—";
+}
+
+/* a figure, or a floor when the link drained the sample faster than a page can time */
+function show(id, r) {
+  if (!r) { $(id).textContent = "n/a"; return false; }
+  const n = r.mbps < 10 ? r.mbps.toFixed(1) : Math.round(r.mbps);
+  const floor = r.windowMs < MIN_WINDOW_MS;
+  $(id).textContent = `${floor ? "≥ " : ""}${n} Mbps`;
+  return floor;
 }
 
 async function runTest() {
   const btn = $("net-run");
   if (btn) { btn.disabled = true; btn.textContent = "Testing…"; }
-  $("net-ping").textContent = "…";
-  $("net-speed").textContent = "…";
+  for (const id of NET_FIGURES) $(id).textContent = "…";
   $("net-note").textContent = "";
   spent = 0;
-  spentBulk = 0;
+  colo = "";
+  performance.clearResourceTimings();
 
   if (!navigator.onLine) {
     // onLine only proves a network interface exists, never that the internet is
@@ -276,28 +302,21 @@ async function runTest() {
   }
 
   try {
-    const ms = await measureLatency();
-    $("net-ping").textContent = ms == null ? "n/a" : `${ms} ms`;
+    const rtt = await measureLatency();
+    if (rtt == null) throw new Error("edge unreachable");
+    $("net-ping").textContent = `${Math.round(rtt)} ms`;
 
-    const r = await measureThroughput();
-    if (!r) throw new Error("no usable sample");
+    const d = await measureDownload();
+    if (!d) throw new Error("no usable sample");
+    const floorD = show("net-speed", d);
+    const floorU = show("net-up", await measureUpload(rtt));
 
     lastRun = Date.now();
     $("net-status").textContent = "Online";
-
-    const shown = r.mbps < 10 ? r.mbps.toFixed(1) : Math.round(r.mbps);
     const used = Math.round(spent / 1024);
-
-    if (r.windowMs < MIN_WINDOW_MS) {
-      // The link drained the payload faster than this page can time it, so the
-      // figure is a floor rather than a reading. Say that instead of implying
-      // precision the sample cannot support.
-      $("net-speed").textContent = `≥ ${shown} Mbps`;
-      $("net-note").textContent = `drained in ${Math.round(r.windowMs)} ms — faster than this page can measure · ${used} KB used`;
-    } else {
-      $("net-speed").textContent = `${shown} Mbps`;
-      $("net-note").textContent = `${r.streams} streams · ${Math.round(r.windowMs)} ms window · ${used} KB used`;
-    }
+    $("net-note").textContent = (floorD || floorU)
+      ? `≥ means faster than this page can time · ${used} KB used`
+      : `measured to Cloudflare${colo ? " " + colo : ""} · ${used} KB used`;
   } catch (err) {
     clearFigures("Unreachable");
     $("net-note").textContent =

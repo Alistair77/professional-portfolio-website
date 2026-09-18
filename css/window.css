@@ -56,6 +56,9 @@
   border-radius: 0;
 }
 
+/* zoomed into the room beside Ari: still a floating window */
+.window.maximized.tiled { border-radius: var(--radius-win); }
+
 /* ---------- title bar ---------- */
 .titlebar {
   position: relative;

@@ -156,7 +156,12 @@ const ROBOT = (() => {
 const BODIES = { tee: TEE, robot: ROBOT };
 const TINT = { tee: "150,198,255", robot: "160,226,255" };
 
-export function createFigure(canvas) {
+/* crop [x, y, w, h] that frames just the face, for the small hover version */
+export const FACE = [OX - 86, OY - 100, 172, 204];
+
+/* `view` crops the drawing to part of the figure (draw with body: null for the
+   face alone); `dot` fattens the dots so a small crop still reads */
+export function createFigure(canvas, { view = [0, 0, FW, FH], dot = 1 } = {}) {
   const ctx = canvas.getContext("2d");
 
   /* the arc reactor: a heartbeat core, counter-rotating rings, a ripple on each beat */
@@ -202,8 +207,9 @@ export function createFigure(canvas) {
   /* s = { t, level, lean:{x,y}, blink, age, bodyAge, breath, body, rm } */
   function draw(s) {
     const { t, level, lean, blink, age, bodyAge, breath, body, rm } = s;
-    ctx.setTransform(canvas.width / FW, 0, 0, canvas.height / FH, 0, 0);
-    ctx.clearRect(0, 0, FW, FH);
+    const [vx, vy, vw, vh] = view, kx = canvas.width / vw, ky = canvas.height / vh;
+    ctx.setTransform(kx, 0, 0, ky, -vx * kx, -vy * ky);
+    ctx.clearRect(vx, vy, vw, vh);
 
     const floor = ctx.createRadialGradient(OX, FH, 10, OX, FH, 190);
     floor.addColorStop(0, `rgba(139,107,255,${0.22 + level * 0.15})`); floor.addColorStop(1, "rgba(139,107,255,0)");
@@ -220,7 +226,7 @@ export function createFigure(canvas) {
     const tint = TINT[body];
 
     ctx.globalCompositeOperation = "lighter";
-    for (const list of [BASE, BODIES[body]]) {
+    for (const list of body ? [BASE, BODIES[body]] : [BASE]) {
       for (const d of list) {
         const isBody = d.kind === "cloth";
         const p = Math.min(1, Math.max(0, ((isBody ? bodyAge : age) - d.delay) / 0.7));
@@ -266,7 +272,7 @@ export function createFigure(canvas) {
         a = Math.min(1, a) * (0.3 + 0.7 * e);
         if (a < 0.02) continue;
         ctx.fillStyle = `rgba(${rgb},${a.toFixed(3)})`;
-        ctx.beginPath(); ctx.arc(x, y, r0 + a * rk, 0, TAU); ctx.fill();
+        ctx.beginPath(); ctx.arc(x, y, (r0 + a * rk) * dot, 0, TAU); ctx.fill();
       }
     }
     ctx.globalCompositeOperation = "source-over";

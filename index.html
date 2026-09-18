@@ -90,6 +90,7 @@
       <rect x="2.4" y="2.4" width="13" height="9.2" rx="2.2" fill="currentColor"/>
       <path d="M22.6 5v4a2.6 2.6 0 0 0 0-4Z" fill="currentColor" fill-opacity=".55"/>
     </svg>
+    <button class="mb-icon mb-ari" id="ari-orb" aria-label="Ari" aria-pressed="false"><span class="orb"></span></button>
     <span class="mb-clock"></span>
   </div>
 </div>
@@ -111,6 +112,15 @@
   <p class="music-sub" id="np-sub">Press play to start</p>
   <div class="tracklist" id="tracklist"></div>
   <label class="vol-row"><span>Volume</span><input type="range" id="vol" min="0" max="100" value="55" aria-label="Volume"></label>
+</div>
+
+<!-- Ari's face on hover over the orb or the dock icon; the buttons themselves are the accessible controls -->
+<div class="ari-peek" id="ari-peek" aria-hidden="true" hidden>
+  <canvas width="128" height="152"></canvas>
+  <div>
+    <p class="peek-line"></p>
+    <p class="peek-cta">Click to talk</p>
+  </div>
 </div>
 
 <!-- menu contents -->
@@ -476,5 +486,6 @@
 <script type="module" src="js/statusbar.js"></script>
 <script type="module" src="js/terminal.js"></script>
 <script type="module" src="js/ari/ari.js"></script>
+<script type="module" src="js/ari/peek.js"></script>
 </body>
 </html>

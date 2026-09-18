@@ -218,7 +218,8 @@ export function renderProjects(body) {
   const sbGroup = (g) => {
     const list = byGroup(g.key);
     if (!list.length) return "";
-    const items = list.map((p) => `<button class="sb-item" data-pane="${p.id}">${esc(p.name)}</button>`).join("");
+    // dot + kicker only show in the narrow list beside Ari (css/ari.css)
+    const items = list.map((p) => `<button class="sb-item" data-pane="${p.id}"><i class="sb-dot" style="background:linear-gradient(160deg,${p.accent[0]},${p.accent[1]})"></i><span>${esc(p.name)}<small>${esc(p.kicker || "")}</small></span></button>`).join("");
     return g.open
       ? `<div class="sb-label">${g.label}</div>${items}`
       : `<details class="sb-group"><summary>${g.label}</summary>${items}</details>`;
@@ -226,7 +227,7 @@ export function renderProjects(body) {
 
   body.querySelector(".sidebar").innerHTML = `
     <div class="sb-label">Library</div>
-    <button class="sb-item" data-pane="all" aria-selected="true">All work</button>
+    <button class="sb-item" data-pane="all" aria-selected="true"><i class="sb-dot"></i><span>All work</span></button>
     ${GROUPS.map(sbGroup).join("")}
     <details class="sb-group"><summary>Web</summary>
       ${web.map((p) => `<a class="sb-item" href="${p.repo}" target="_blank" rel="noopener">${esc(p.name)}</a>`).join("")}
