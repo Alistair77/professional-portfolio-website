@@ -1,0 +1,61 @@
+/* Ari — the desktop assistant window. */
+
+.window[data-app="ari"] .win-body {
+  background: radial-gradient(90% 80% at 72% 40%, #2E3268 0%, #181B3A 55%, #0F1126 100%);
+}
+
+.ari-body { flex: 1; display: grid; grid-template-columns: 260px 1fr; min-height: 0; }
+
+.ari-dlg { display: grid; gap: 9px; align-content: center; padding: 0 8px 0 24px; }
+.ari-head { display: flex; align-items: center; justify-content: space-between; }
+.ari-dlg .d-name { margin: 0; font-size: 10.5px; font-weight: 600; letter-spacing: .09em; text-transform: uppercase; opacity: .55; }
+.ari-sound { width: 26px; height: 26px; border-radius: 50%; border: 1px solid rgba(255,255,255,.2); background: rgba(255,255,255,.06); color: rgba(255,255,255,.7); display: grid; place-items: center; cursor: pointer; padding: 0; }
+.ari-sound svg { width: 13px; height: 13px; }
+.ari-sound .on { display: none; }
+.ari-sound[aria-pressed="true"] { color: #fff; border-color: #9C96FF; background: rgba(156,150,255,.25); }
+.ari-sound[aria-pressed="true"] .on { display: block; }
+.ari-sound[aria-pressed="true"] .off { display: none; }
+
+.ari-dlg .d-prev { margin: 0; font-size: 12.5px; line-height: 1.35; opacity: .42; filter: blur(1.5px); min-height: 17px; max-height: 34px; overflow: hidden; }
+.ari-dlg .d-line { margin: 0; font-size: 16px; line-height: 1.38; font-weight: 500; min-height: 44px; text-wrap: pretty; }
+.ari-dlg .caret { display: inline-block; width: .5em; height: 1em; background: #fff; vertical-align: -.13em; margin-left: 2px; animation: ari-blink 1s steps(1) infinite; }
+@keyframes ari-blink { 50% { opacity: 0; } }
+
+.ari-dlg .d-chips { display: flex; flex-wrap: wrap; gap: 6px; min-height: 28px; }
+.ari-dlg .d-chips button,
+.ari-dlg .d-chips a { font: 500 12px inherit; font-family: inherit; padding: 6px 11px; border-radius: 99px; border: 0; background: #fff; color: #13142A; cursor: pointer; text-decoration: none; transition: background .15s, transform .15s; animation: ari-chip .28s ease-out both; }
+.ari-dlg .d-chips a { background: #9C96FF; color: #0E0F20; }
+.ari-dlg .d-chips button:hover { background: #DCDBFF; }
+.ari-dlg .d-chips a:hover { background: #B9B5FF; text-decoration: none; }
+.ari-dlg .d-chips button:active, .ari-dlg .d-chips a:active { transform: scale(.97); }
+@keyframes ari-chip { from { opacity: 0; transform: translateY(4px); } }
+
+.ari-dlg .d-ask { display: flex; gap: 6px; margin: 0; }
+.ari-dlg .d-ask input { flex: 1; min-width: 0; background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.18); border-radius: 99px; padding: 7px 12px; color: #fff; font-family: inherit; font-size: 12px; }
+.ari-dlg .d-ask input::placeholder { color: rgba(255,255,255,.5); }
+.ari-dlg .d-ask button { width: 30px; height: 30px; border-radius: 50%; border: 0; background: #9C96FF; color: #0E0F20; font-weight: 700; cursor: pointer; flex: 0 0 auto; }
+
+.ari-outfit { display: flex; gap: 10px; }
+.ari-outfit .fit { width: 36px; height: 36px; border-radius: 50%; border: 1px solid rgba(255,255,255,.22); background: rgba(255,255,255,.07); color: #fff; display: grid; place-items: center; cursor: pointer; padding: 0; transition: background .2s, border-color .2s, box-shadow .2s, transform .15s; }
+.ari-outfit .fit:hover { background: rgba(255,255,255,.14); }
+.ari-outfit .fit:active { transform: scale(.94); }
+.ari-outfit .fit[aria-pressed="true"] { background: rgba(156,150,255,.3); border-color: #9C96FF; box-shadow: 0 0 14px rgba(156,150,255,.45); }
+.ari-outfit svg { width: 18px; height: 18px; display: block; }
+
+.ari-fig { position: relative; display: flex; align-items: flex-end; justify-content: center; min-height: 0; overflow: hidden; }
+.ari-fig canvas { height: 100%; width: auto; max-width: 100%; aspect-ratio: 310 / 412; display: block; }
+
+/* the dock icon */
+.dock .glyph-ari { background: radial-gradient(circle at 38% 32%, #fff 0, #8FE3FF 24%, #8B6BFF 62%, #FF6FB5 100%); }
+
+@media (max-width: 760px) {
+  .ari-body { grid-template-columns: 1fr; grid-template-rows: minmax(0, 44%) auto; }
+  .ari-fig { order: -1; }
+  .ari-dlg { padding: 10px 16px 16px; align-content: start; }
+  .ari-dlg .d-line { font-size: 15px; }
+  .ari-dlg .d-ask input { font-size: 16px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ari-dlg .caret, .ari-dlg .d-chips button, .ari-dlg .d-chips a { animation: none; }
+}
