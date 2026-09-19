@@ -40,6 +40,7 @@ const MAX_SCALE = 1.42;
 const REACH = 105; // px of influence either side
 
 dock.addEventListener("pointermove", (e) => {
+  if (e.pointerType !== "mouse") return; // a finger has no hover: magnifying under it just jolts the icons
   for (const btn of items) {
     const r = btn.getBoundingClientRect();
     const d = Math.abs(e.clientX - (r.left + r.width / 2));

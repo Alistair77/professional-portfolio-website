@@ -43,6 +43,15 @@
 
   .dock::-webkit-scrollbar { display: none; }
   .dock-item::after { display: none; } /* tooltips are pointless without hover */
+  /* the sideways-scrolling dock clips anything above its 8px top padding,
+     so the launch bounce becomes a hop that fits inside it */
+  @keyframes dockBounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-6px); }
+  }
+
+  /* no grey/blue flash box on every tap */
+  html { -webkit-tap-highlight-color: transparent; }
 
   /* ---------- windows ---------- */
   .window {
@@ -54,21 +63,26 @@
   }
 
   /* Desktop leans on backdrop-filter for legibility (surfaces are 62-74%
-     opaque). Phones disable it under low-power mode and it is expensive to
-     composite while scrolling — so make the surfaces carry the contrast
-     themselves and drop the blur entirely. */
-  .window {
-    background: rgba(28, 30, 37, 0.97);
+     opaque). On a phone, re-blurring the wallpaper under the menu bar and
+     dock every frame made them (and opening windows) flicker — so the
+     surfaces carry the contrast themselves and the blur goes entirely. */
+  .window, .menubar, .dock, .mb-menu, .popover {
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
   }
 
+  .window { background: rgba(28, 30, 37, 0.97); }
   .content { background: rgba(20, 21, 27, 0.99); }
   .sidebar { background: rgba(44, 46, 55, 0.99); }
   .titlebar { background: rgba(56, 58, 68, 0.99); }
-  .menubar { background: rgba(14, 16, 23, 0.92); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px); }
+  .menubar { background: rgba(14, 16, 23, 0.92); }
   .dock { background: rgba(48, 50, 60, 0.86); }
-  .popover { background: rgba(26, 28, 34, 0.98); }
+  .popover, .mb-menu { background: rgba(26, 28, 34, 0.98); }
+
+  /* The wallpaper holds still too: its endless motions kept huge GPU layers
+     compositing under everything (and the arc light repainted every frame). */
+  .wall-bloom, .wall-bloom.b2, .wall-arcs, .wall-dust, .arc-glow use { animation: none; will-change: auto; }
+  .arc-glow { display: none; }
 
   .titlebar { height: 48px; padding: 0 14px; }
   .title { font-size: var(--text-base); }
