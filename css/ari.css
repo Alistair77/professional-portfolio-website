@@ -6,10 +6,6 @@
   --ari-violet: #9C96FF;
 }
 
-/* sized here: wm.js applies the template's data-width/height without units,
-   so no window's template size has ever taken effect */
-.window[data-app="ari"] { width: 640px; height: 480px; }
-
 .window[data-app="ari"] .win-body {
   background: radial-gradient(90% 80% at 72% 40%, #2E3268 0%, #181B3A 55%, #0F1126 100%);
 }

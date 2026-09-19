@@ -2,7 +2,7 @@
    data-app="ari">), talks in scripted lines, points at the Projects window,
    and explains whichever project the visitor picks there. */
 
-import { openApp, focusWindow, besideAri } from "../wm.js";
+import { openApp, focusWindow, besideAri, resetSize } from "../wm.js";
 import { createFigure } from "./figure.js";
 import { voice } from "./voice.js";
 import { LINES, CHIPS, LABEL, LINKS, PANE, PANE_NODE, ROUTES, MORE, greeting } from "./lines.js";
@@ -177,10 +177,7 @@ document.addEventListener("app:close", (e) => {
   win = fig = canvas = ui = null;
   /* without Ari the list has nobody to explain it: Projects gets its full size back */
   const pw = projectsWin();
-  if (isList(pw)) {
-    pw.style.width = pw.style.height = "";
-    pw.style.left = Math.max(14, Math.min(pw.offsetLeft, innerWidth - pw.offsetWidth - 14)) + "px";
-  }
+  if (isList(pw)) resetSize(pw);
 });
 
 /* ── animation: only runs while the window exists ── */

@@ -44,8 +44,8 @@ export function openApp(id) {
   el.innerHTML = chrome(tpl.dataset.title || id) ;
   el.querySelector(".win-body").append(tpl.content.cloneNode(true));
 
-  if (tpl.dataset.width) el.style.width = tpl.dataset.width;
-  if (tpl.dataset.height) el.style.height = tpl.dataset.height;
+  if (tpl.dataset.width) el.style.width = tpl.dataset.width + "px";
+  if (tpl.dataset.height) el.style.height = tpl.dataset.height + "px";
 
   place(el, tpl);
   layer.append(el);
@@ -92,9 +92,10 @@ function place(el, tpl) {
   const maxW = Math.min(w, innerWidth - 28);
   const maxH = Math.min(h, innerHeight - MENUBAR_H - DOCK_SAFE);
   const step = (cascade++ % 5) * 26;
+  const lowest = innerHeight - DOCK_SAFE - maxH; // any lower and the cascade tucks tall windows under the dock
 
   el.style.left = Math.max(14, (innerWidth - maxW) / 2 + step - 52) + "px";
-  el.style.top = Math.max(MENUBAR_H + 12, (innerHeight - DOCK_SAFE - maxH) / 2 + step - 40) + "px";
+  el.style.top = Math.max(MENUBAR_H + 12, Math.min(lowest, lowest / 2 + step - 40)) + "px";
 }
 
 /* ---------- behaviour ---------- */
@@ -265,6 +266,14 @@ export function besideAri(el, width) {
     maxHeight: "",
   });
   return true;
+}
+
+/* back to the size it opened at, nudged fully onto the desk */
+export function resetSize(el) {
+  const { width, height } = document.querySelector(`template[data-app="${el.dataset.app}"]`).dataset;
+  Object.assign(el.style, { width: width + "px", height: height + "px" });
+  el.style.left = Math.max(14, Math.min(el.offsetLeft, innerWidth - el.offsetWidth - 14)) + "px";
+  el.style.top = Math.max(MENUBAR_H + 12, Math.min(el.offsetTop, innerHeight - DOCK_SAFE - el.offsetHeight)) + "px";
 }
 
 /* Escape closes the front window — cheap keyboard exit. */
