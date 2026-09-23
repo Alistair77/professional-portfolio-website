@@ -3,7 +3,7 @@
    command language nobody can guess. The work listing is derived from the
    shared PROJECTS data, so it can never drift from the Projects window. */
 
-import { PROJECTS } from "./projects.js?v=4";
+import { PROJECTS } from "./projects.js?v=5";
 
 const REPOS = PROJECTS.filter((p) => p.group === "ai").map((p) => p.id + "/");
 

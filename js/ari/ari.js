@@ -2,13 +2,13 @@
    data-app="ari">), talks in scripted lines, points at the Projects window,
    and explains whichever project the visitor picks there. */
 
-import { openApp, focusWindow, besideAri, resetSize } from "../wm.js?v=4";
-import { createFigure } from "./figure.js?v=4";
-import { voice } from "./voice.js?v=4";
-import { decide } from "./decide.js?v=4";
-import { micSupported, listenOnce, stopListening } from "./mic.js?v=4";
-import { LINES, CHIPS, LABEL, LINKS, PANE, PANE_NODE, MORE, greeting, GITHUB, LINKEDIN } from "./lines.js?v=4";
-import { PROJECTS } from "../projects.js?v=4";
+import { openApp, focusWindow, besideAri, resetSize } from "../wm.js?v=5";
+import { createFigure } from "./figure.js?v=5";
+import { voice } from "./voice.js?v=5";
+import { decide } from "./decide.js?v=5";
+import { micSupported, listenOnce, stopListening } from "./mic.js?v=5";
+import { LINES, CHIPS, LABEL, LINKS, PANE, PANE_NODE, MORE, greeting, GITHUB, LINKEDIN } from "./lines.js?v=5";
+import { PROJECTS } from "../projects.js?v=5";
 
 const RM = matchMedia("(prefers-reduced-motion: reduce)").matches;
 const clamp = (v, a = -1, b = 1) => Math.max(a, Math.min(b, v));
@@ -39,11 +39,33 @@ const APP = { resume: "resume", contact: "contact", terminal: "terminal", about:
 /* confirm-to-open: github/linkedin ask first, yesOpen/noThanks resolve it */
 const PENDING = { for: null };
 
-/* open an app tiled beside Ari — never dropped on top of it. On phones
-   windows stack full-screen, so besideAri declines and it opens normally. */
-function openBeside(id, width) {
+const HALF_GAP = 16; // matches wm.js: windows never touch chrome or each other
+/* equal split: Ari gives up its stage width so both windows share 50-50.
+   Falls back to the narrow beside-list when the screen is too small. */
+function openHalf(id) {
   const el = openApp(id);
-  if (el && besideAri(el, width)) focusWindow(win);
+  if (!el || !win || PHONE.matches) return el;
+  const half = Math.floor((innerWidth - HALF_GAP * 3) / 2);
+  if (half < 340 || win.hidden) {
+    if (besideAri(el, 620)) focusWindow(win);
+    return el;
+  }
+  el.classList.remove("maximized", "tiled");
+  const top = Math.max(48, win.offsetTop);
+  Object.assign(win.style, {
+    left: innerWidth - half - HALF_GAP + "px",
+    width: half + "px",
+  });
+  Object.assign(el.style, {
+    left: HALF_GAP + "px",
+    top: top + "px",
+    width: half + "px",
+    height: win.offsetHeight + "px",
+    maxWidth: "",
+    maxHeight: "",
+  });
+  glance(el);
+  focusWindow(win);
   return el;
 }
 
@@ -53,7 +75,7 @@ function go(id, { fromPanel = false } = {}) {
   if (id === "yesOpen" && !PENDING.for) id = "yesOpenIdle";
   const points = Object.hasOwn(PANE, id);
   if (points && !fromPanel) showProject(PANE[id]);
-  if (Object.hasOwn(APP, id)) openBeside(APP[id], 620);
+  if (Object.hasOwn(APP, id)) openHalf(APP[id]);
   if (id === "music") document.dispatchEvent(new CustomEvent("ari:toggle-music"));
   if (id === "github" || id === "linkedin") PENDING.for = id;
   else if (id !== "yesOpen" && id !== "noThanks") PENDING.for = null;

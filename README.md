@@ -124,8 +124,10 @@ through in a notebook. `Jupyter` `Python`
 ## Skills
 
 **AI & Data** — Python · LangGraph · Claude · FAISS · BM25 · RRF · Ollama · DuckDB · K-means
-**Backend** — FastAPI · Pydantic · Postgres · Redis · Kotlin · Streamlit · Unit testing
-**Frontend & 3D** — React · Three.js · GLSL · WebGL · GSAP · Ant Design · Vanilla JS
+**Backend** — Python · FastAPI · PostgreSQL · Git · GitHub
+**Data & Analytics** — SQL · Pandas · NumPy · scikit-learn · Tableau · Power BI · Streamlit
+**Frontend & Product** — React · GSAP · Three.js · WebGL · HTML/CSS · Figma · UI/UX · Wireframing · Prototyping
+**People** — Agile/Scrum · Stakeholder communication · Team leadership · Empathy
 
 ---
 
