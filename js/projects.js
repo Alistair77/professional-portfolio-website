@@ -123,13 +123,32 @@ export const PROJECTS = [
     year: "2026",
     group: "ai",
     accent: ["#F2906B", "#9C3A22"],
-    // private repo for now, so no public link
+    repo: "https://github.com/Alistair77/Jericho-Agentic-Space-Station",
+    demo: "https://alistair77.github.io/Jericho-Agentic-Space-Station/",
+    demoLabel: "Live station",
+    shots: ["jericho_hero.jpg", "jericho_night.jpg", "jericho_skills.jpg"],
     tags: ["three.js", "Claude Code hooks", "Web Audio", "One HTML file"],
     body: [
       ["Idle means idle", "Thirty installed skills live on the station as small bots across nine buildings — trend spotting, research, scripting, thumbnails, editing, publishing. When nothing is running, nothing moves. No dashboard theatre."],
       ["Real, not decorative", "A thirty-line Claude Code hook records which skill has just started or finished, and the page reads it every five seconds: the matching bot walks to its building and a progress bar fills over its head. One line at the bottom says who is working, on what, and how far along."],
       ["Calm by design", "The workflow runs one skill at a time, so only one bar ever moves. Events collect in a notifications panel instead of popping up, and a rehearsal mode walks the whole pipeline so you can watch the crew hand work along."],
       ["One file, five skies", "A single HTML file — no install, no build step, opens straight from disk. Five kinds of weather change the light, the particles and the sound, all generated live with Web Audio, and the clock keeps real Mars time at Jezero Crater."],
+    ],
+  },
+  {
+    id: "openjev",
+    name: "OpenJev",
+    kicker: "Typed Decision Intelligence",
+    tagline: "Turns a messy judgment call into a typed, inspectable decision — probabilities and honest abstention instead of prose you have to trust.",
+    year: "2026",
+    group: "ai",
+    accent: ["#B9B5FF", "#5B54D6"],
+    repo: "https://github.com/Alistair77/openjev",
+    tags: ["Python", "FastAPI", "Pydantic", "TypeScript", "Calibration"],
+    body: [
+      ["Decisions, not prose", "Send one state plus named questions — choice, score, or noul — and get back probabilities, confidence, abstention and an audit trace. The same class of engine Ari uses on this site to turn words into actions."],
+      ["Abstention is a feature", "Confidence is 1 minus the normalized entropy of the distribution. Below your threshold the answer says so explicitly instead of guessing loudly — the system refuses to pretend it knows."],
+      ["Local-first, fully surfaced", "The default backend is a deterministic lexical baseline: no API key, no network, sub-millisecond latency. FastAPI plus a local playground, an openjev CLI, a TypeScript SDK, and a trainable research scorer with accuracy, log-loss, Brier and ECE out of the box."],
     ],
   },
   {

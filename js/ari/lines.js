@@ -79,7 +79,7 @@ export const PANE = {
 /* clicking a pane in the Projects window → which line Ari answers with */
 export const PANE_NODE = {
   all: "work", ragstar: "rag", zetsu: "zetsu", orchestrator: "orchestrator", evals: "evals",
-  "semantic-cache": "cache", text2sql: "text2sql", jericho: "jericho",
+  "semantic-cache": "cache", text2sql: "text2sql", jericho: "jericho", openjev: "other",
   aapl: "other", "study-snipp": "other", "health-weight": "other",
 };
 
@@ -280,7 +280,7 @@ export const MORE = {
     "Everything? Forty-plus hostile queries, deletes smuggled inside CTEs, a generator that lies at full confidence. None of it reaches your data, and every answer shows the exact SQL it ran. Paranoid, auditable, charming. Two out of three is still a lot.",
   ],
   jericho: [
-    "The long version. A hook in Claude Code writes down which skill just started, the page checks every five seconds, and the right bot walks to the right building with a progress bar over its head. Nothing else moves. It's private for now, so the only way in is asking him. Nicely.",
+    "The long version. A hook in Claude Code writes down which skill just started, the page checks every five seconds, and the right bot walks to the right building with a progress bar over its head. Nothing else moves. It's public now, live station linked in Projects. Nicely.",
     "All of it, then. One HTML file, no build step, five kinds of Martian weather with sound made on the fly, and the clock keeps real Mars time. Over-engineered? Beautifully. I'd know.",
   ],
   other: [
