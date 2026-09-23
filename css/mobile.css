@@ -22,11 +22,13 @@
 
   /* ---------- menu bar ---------- */
   .menubar { padding: 0 8px; gap: 0; }
-  .mb-item { padding: 7px 9px; }
+  .mb-item { padding: 7px 6px; }
+  /* the status icons keep their 36px targets; on the narrowest phones the name gives way */
+  .mb-item.is-app { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
   .mb-mark { font-size: 16px; }
   .mb-icon { width: 36px; height: 36px; }
   .mb-chev { width: 26px; }
-  .mb-right { gap: 4px; }
+  .mb-right { gap: 3px; }
   .mb-clock { font-size: var(--text-sm); }
 
   /* ---------- dock: scrolls rather than shrinking ---------- */

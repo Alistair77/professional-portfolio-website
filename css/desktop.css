@@ -411,6 +411,7 @@ body.booting .desk-icons { opacity: 0; }
   /* .menubar so it outranks .mb-icon and .mb-right svg, which set display */
   .menubar .mb-hide { display: none; }
   .mb-clock { min-width: 0; }
+  .mb-date { display: none; } /* a phone's status bar shows the time alone */
 }
 
 /* ---------- menu-bar icon buttons ---------- */

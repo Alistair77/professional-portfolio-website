@@ -4,14 +4,16 @@ import { openApp, closeApp, isOpen } from "./wm.js";
 import { renderProjects } from "./projects.js";
 
 /* ---------- clock ---------- */
-const clock = document.querySelector(".mb-clock");
-const fmt = new Intl.DateTimeFormat(undefined, {
-  weekday: "short", month: "short", day: "numeric",
-  hour: "numeric", minute: "2-digit",
-});
+/* date and time are separate so phones can show the time alone, as a phone does */
+const clockDate = document.querySelector(".mb-clock .mb-date");
+const clockTime = document.querySelector(".mb-clock .mb-time");
+const fmtDate = new Intl.DateTimeFormat(undefined, { weekday: "short", month: "short", day: "numeric" });
+const fmtTime = new Intl.DateTimeFormat(undefined, { hour: "numeric", minute: "2-digit" });
 
 function tick() {
-  clock.textContent = fmt.format(new Date()).replace(/,/g, "");
+  const now = new Date();
+  clockDate.textContent = fmtDate.format(now).replace(/,/g, "");
+  clockTime.textContent = fmtTime.format(now);
 }
 tick();
 /* align to the minute boundary so the displayed time is never stale */

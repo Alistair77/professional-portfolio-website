@@ -6,16 +6,30 @@
   --ari-violet: #9C96FF;
 }
 
+/* sized here: wm.js applies the template's data-width/height without units,
+   so no window's template size has ever taken effect.
+   Ari takes the stage: ~78vw × full heightAboveDock, capped so it never
+   touches the menubar, the dock, or the viewport edges. At 1440×900 that is
+   1123×760 ≈ 66% of the screen; at 1280×800 ≈ 64%. */
+.window[data-app="ari"] { width: 1000px; height: 700px; }
 .window[data-app="ari"] .win-body {
   background: radial-gradient(90% 80% at 72% 40%, #2E3268 0%, #181B3A 55%, #0F1126 100%);
 }
 
-.ari-body { flex: 1; display: grid; grid-template-columns: 260px 1fr; min-height: 0; }
+.ari-body { flex: 1; display: grid; grid-template-columns: minmax(300px, 36%) 1fr; min-height: 0; }
 
 .ari-dlg { display: grid; gap: 9px; align-content: center; padding: 0 8px 0 24px; }
 .ari-head { display: flex; align-items: center; justify-content: space-between; }
+/* ── touch grid: 4px base unit, 44px minimum targets (Apple HIG), 8px gaps.
+   Ari's controls sit in one hand's reach: mic and send flank the input,
+   voice toggles ride together in the header. Phone rules at the bottom
+   step everything to 48px with no overlaps. ── */
+
 .ari-dlg .d-name { margin: 0; font-size: 10.5px; font-weight: 600; letter-spacing: .09em; text-transform: uppercase; opacity: .55; }
-.ari-sound { width: 26px; height: 26px; border-radius: 50%; border: 1px solid rgba(255,255,255,.2); background: rgba(255,255,255,.06); color: rgba(255,255,255,.7); display: grid; place-items: center; cursor: pointer; padding: 0; }
+.ari-toggles { display: flex; align-items: center; gap: 8px; }
+.ari-voice { height: 32px; padding: 0 14px; border-radius: 99px; border: 1px solid rgba(255,255,255,.2); background: rgba(255,255,255,.06); color: rgba(255,255,255,.75); font-family: inherit; font-size: 12px; font-weight: 650; letter-spacing: .04em; cursor: pointer; }
+.ari-voice:hover { background: rgba(255,255,255,.14); color: #fff; }
+.ari-sound { width: 32px; height: 32px; border-radius: 50%; border: 1px solid rgba(255,255,255,.2); background: rgba(255,255,255,.06); color: rgba(255,255,255,.7); display: grid; place-items: center; cursor: pointer; padding: 0; }
 .ari-sound svg { width: 13px; height: 13px; }
 .ari-sound .on { display: none; }
 .ari-sound[aria-pressed="true"] { color: #fff; border-color: #9C96FF; background: rgba(156,150,255,.25); }
@@ -27,19 +41,61 @@
 .ari-dlg .caret { display: inline-block; width: .5em; height: 1em; background: #fff; vertical-align: -.13em; margin-left: 2px; animation: ari-blink 1s steps(1) infinite; }
 @keyframes ari-blink { 50% { opacity: 0; } }
 
-.ari-dlg .d-chips { display: flex; flex-wrap: wrap; gap: 6px; min-height: 28px; }
+.ari-dlg .d-chips { display: flex; flex-wrap: wrap; gap: 8px; min-height: 36px; }
 .ari-dlg .d-chips button,
-.ari-dlg .d-chips a { font: 500 12px inherit; font-family: inherit; padding: 6px 11px; border-radius: 99px; border: 0; background: #fff; color: #13142A; cursor: pointer; text-decoration: none; transition: background .15s, transform .15s; animation: ari-chip .28s ease-out both; }
+.ari-dlg .d-chips a { font: 500 13px inherit; font-family: inherit; padding: 9px 15px; border-radius: 99px; border: 0; background: #fff; color: #13142A; cursor: pointer; text-decoration: none; transition: background .15s, transform .15s; animation: ari-chip .28s ease-out both; }
 .ari-dlg .d-chips a { background: #9C96FF; color: #0E0F20; }
 .ari-dlg .d-chips button:hover { background: #DCDBFF; }
 .ari-dlg .d-chips a:hover { background: #B9B5FF; text-decoration: none; }
 .ari-dlg .d-chips button:active, .ari-dlg .d-chips a:active { transform: scale(.97); }
 @keyframes ari-chip { from { opacity: 0; transform: translateY(4px); } }
 
-.ari-dlg .d-ask { display: flex; gap: 6px; margin: 0; }
-.ari-dlg .d-ask input { flex: 1; min-width: 0; background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.18); border-radius: 99px; padding: 7px 12px; color: #fff; font-family: inherit; font-size: 12px; }
+/* what Ari heard + which engine decided — so voice answers are never a mystery */
+.ari-dlg .d-src { margin: 0; min-height: 15px; font-size: 11px; line-height: 1.35; color: rgba(255,255,255,.45); }
+.ari-dlg .d-src:empty { display: none; }
+
+.ari-dlg .d-ask { display: flex; gap: 8px; margin: 0; align-items: center; }
+.ari-dlg .d-ask input { flex: 1; min-width: 0; min-height: 44px; background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.18); border-radius: 99px; padding: 7px 14px; color: #fff; font-family: inherit; font-size: 12px; }
 .ari-dlg .d-ask input::placeholder { color: rgba(255,255,255,.5); }
-.ari-dlg .d-ask button { width: 30px; height: 30px; border-radius: 50%; border: 0; background: #9C96FF; color: #0E0F20; font-weight: 700; cursor: pointer; flex: 0 0 auto; }
+.ari-dlg .d-ask button[type="submit"] { width: 44px; height: 44px; border-radius: 50%; border: 0; background: #9C96FF; color: #0E0F20; font-size: 17px; font-weight: 700; cursor: pointer; flex: 0 0 auto; }
+.ari-dlg .d-mic { width: 44px; height: 44px; border-radius: 50%; border: 1px solid rgba(255,255,255,.22); background: rgba(255,255,255,.07); color: #fff; display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; padding: 0; flex: 0 0 auto; }
+.ari-dlg .d-mic svg { width: 18px; height: 18px; flex: 0 0 auto; }
+.ari-dlg .d-mic:hover { background: rgba(255,255,255,.14); }
+.ari-dlg .d-mic[aria-pressed="true"] { background: rgba(255,111,181,.35); border-color: #FF6FB5; box-shadow: 0 0 14px rgba(255,111,181,.5); }
+.ari-dlg .d-mic:disabled { opacity: .35; cursor: default; }
+/* listening pill: mic icon gives way to an equaliser + timer, tap again to stop */
+.ari-dlg .d-mic .eq, .ari-dlg .d-mic .t { display: none; }
+.ari-dlg .d-mic.live { width: auto; padding: 0 16px; border-radius: 99px; }
+.ari-dlg .d-mic.live svg { display: none; }
+.ari-dlg .d-mic.live .eq { display: flex; gap: 3px; align-items: center; height: 16px; }
+.ari-dlg .d-mic.live .eq i { width: 3px; border-radius: 2px; background: #FF6FB5; animation: ari-eq .9s ease-in-out infinite; }
+.ari-dlg .d-mic.live .eq i:nth-child(2) { animation-delay: .12s; }
+.ari-dlg .d-mic.live .eq i:nth-child(3) { animation-delay: .24s; }
+.ari-dlg .d-mic.live .eq i:nth-child(4) { animation-delay: .36s; }
+.ari-dlg .d-mic.live .eq i:nth-child(5) { animation-delay: .48s; }
+@keyframes ari-eq { 0%, 100% { height: 4px; } 50% { height: 15px; } }
+.ari-dlg .d-mic.live .t { display: block; font-size: 12px; font-variant-numeric: tabular-nums; color: #fff; }
+
+/* thinking dots while the decision engine works */
+.ari-dlg .think { display: inline-flex; gap: 5px; align-items: center; padding: 6px 0; }
+.ari-dlg .think i { width: 7px; height: 7px; border-radius: 50%; background: #9C96FF; animation: ari-think 1s ease-in-out infinite; }
+.ari-dlg .think i:nth-child(2) { animation-delay: .15s; }
+.ari-dlg .think i:nth-child(3) { animation-delay: .3s; }
+@keyframes ari-think { 0%, 100% { opacity: .3; transform: translateY(0); } 50% { opacity: 1; transform: translateY(-4px); } }
+
+/* status-bar mic: wider target, pulses red while listening */
+#ari-mic { width: 34px; height: 26px; }
+#ari-mic svg { width: 17px; height: 17px; }
+#ari-mic[aria-pressed="true"] { color: #FF6FB5; }
+#ari-mic.listening { animation: ari-mic-pulse 1.1s ease-in-out infinite; }
+@keyframes ari-mic-pulse { 50% { opacity: .45; } }
+/* menu-bar speaker: muted state dims so ON vs OFF reads at a glance */
+#ari-sound.is-off { color: rgba(255,255,255,.45); }
+#ari-sound.is-off .snd-on { display: none; }
+#ari-sound:not(.is-off) .snd-off { display: none; }
+/* orb shimmers while the engine thinks */
+.mb-ari.thinking .orb { animation: ari-think-orb 1s ease-in-out infinite; }
+@keyframes ari-think-orb { 50% { box-shadow: 0 0 0 3px rgba(156,150,255,.7), 0 0 20px rgba(139,107,255,1); } }
 
 .ari-outfit { display: flex; gap: 10px; }
 .ari-outfit .fit { width: 36px; height: 36px; border-radius: 50%; border: 1px solid rgba(255,255,255,.22); background: rgba(255,255,255,.07); color: #fff; display: grid; place-items: center; cursor: pointer; padding: 0; transition: background .2s, border-color .2s, box-shadow .2s, transform .15s; }
@@ -139,12 +195,68 @@
   to { opacity: 0; transform: scale(1.5); }
 }
 
+/* ── phones: the AI work as a slim sideways strip on top of Ari; Projects stays shut ── */
+.ari-strip { display: none; }
+
+@media (max-width: 760px) {
+  /* min-content, not auto: auto rows share the spare height, and the strip would swell */
+  .ari-body:has(.ari-strip:not([hidden])) { grid-template-rows: min-content minmax(0, 40%) auto; }
+  .ari-strip:not([hidden]) {
+    position: relative; /* the pills' offsetParent, so centring one is plain arithmetic */
+    order: -2;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 10px;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+    background: rgba(8, 9, 22, 0.35);
+    box-shadow: inset 0 -1px 0 rgba(255, 255, 255, 0.08);
+    animation: stripIn 260ms var(--ease) both;
+  }
+  .ari-strip::-webkit-scrollbar { display: none; }
+  .strip-label { flex: 0 0 auto; padding: 0 2px 0 4px; font-size: 10.5px; font-weight: 650; letter-spacing: 0.09em; text-transform: uppercase; color: rgba(255, 255, 255, 0.5); }
+  .strip-pill {
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    min-height: 38px;
+    padding: 6px 14px 6px 9px;
+    border: 0;
+    border-radius: 100px;
+    background: rgba(255, 255, 255, 0.09);
+    color: #fff;
+    font-size: var(--text-sm);
+    white-space: nowrap;
+    cursor: pointer;
+    transition: background var(--dur-fast) var(--ease), color var(--dur-fast) var(--ease);
+  }
+  .strip-pill i { flex: 0 0 auto; width: 16px; height: 16px; border-radius: 5px; }
+  .strip-pill:active { background: rgba(255, 255, 255, 0.16); }
+  .strip-pill[aria-pressed="true"] { background: var(--ari-violet); color: #0E0F20; }
+}
+@keyframes stripIn { from { opacity: 0; transform: translateY(-6px); } }
+
 @media (max-width: 760px) {
   .ari-body { grid-template-columns: 1fr; grid-template-rows: minmax(0, 44%) auto; }
   .ari-fig { order: -1; }
-  .ari-dlg { padding: 10px 16px 16px; align-content: start; }
+  .ari-dlg { padding: 10px 16px 16px; align-content: start; gap: 10px; }
   .ari-dlg .d-line { font-size: 15px; }
   .ari-dlg .d-ask input { font-size: 16px; }
+  /* phone touch grid: 48px targets, nothing overlaps, nothing hides */
+  .ari-dlg .d-ask { gap: 10px; }
+  .ari-dlg .d-mic { width: 48px; height: 48px; }
+  .ari-dlg .d-mic.live { padding: 0 16px; }
+  .ari-dlg .d-ask input { min-height: 48px; }
+  .ari-dlg .d-ask button[type="submit"] { width: 48px; height: 48px; }
+  .ari-dlg .d-chips { gap: 10px; }
+  .ari-dlg .d-chips button, .ari-dlg .d-chips a { min-height: 44px; font-size: 14px; }
+  .ari-toggles { gap: 10px; }
+  .ari-sound { width: 40px; height: 40px; }
+  .ari-voice { height: 40px; padding: 0 16px; font-size: 13px; }
+  .ari-dlg .d-src { font-size: 12px; }
 }
 
 @media (prefers-reduced-motion: reduce) {

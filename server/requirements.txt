@@ -1,0 +1,4 @@
+# The decision engine runs here, on this machine — same repo, one command, no cloud.
+laya
+fastapi
+uvicorn

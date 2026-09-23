@@ -1,2 +1,6 @@
 .DS_Store
 .claude/
+__pycache__/
+server/__pycache__/
+server/.venv/
+.venv/

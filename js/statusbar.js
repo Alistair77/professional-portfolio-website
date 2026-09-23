@@ -123,6 +123,12 @@ listEl?.addEventListener("click", (e) => {
 });
 
 vol?.addEventListener("input", () => { if (audio) audio.volume = vol.value / 100; });
+
+/* Ari can start the music on voice request ("play some music").
+   Only starts — never pauses out from under the visitor. */
+document.addEventListener("ari:toggle-music", () => {
+  if (!audio || audio.paused) playBtn?.click();
+});
 paintList();
 
 /* ---------- network ----------
@@ -151,9 +157,13 @@ register(netBtn, netPop);
 
 const EDGE = "https://speed.cloudflare.com";
 const MIN_WINDOW_MS = 220;     // below this the sample is noise
-const DOWN_STEPS = [[3, 200_000], [5, 200_000]]; // [streams, bytes each]: 0.6 MB, then 1 MB more
-const UP_STEPS = [200_000, 800_000];             // one upload each; sent bytes cost data too
-const MAX_BYTES = 2_600_000;   // never spend more than ~2.6 MB of someone's data
+/* Escalate only while a sample drains too fast to trust, so a slow link stops
+   after the first step (~0.8 MB) and only a fast one spends the rest. Data
+   Saver gets the first step alone. */
+const DOWN_STEPS = [[3, 200_000], [4, 500_000], [4, 1_250_000]]; // [streams, bytes each]: 0.6, 2, 5 MB
+const UP_STEPS = [300_000, 2_000_000];                           // one upload each; sent bytes cost data too
+const LITE = !!navigator.connection?.saveData;
+const steps = (list) => (LITE ? list.slice(0, 1) : list);
 const REQ_TIMEOUT_MS = 8000;   // a hung request must not hang the panel
 const STALE_AFTER_MS = 120_000;
 
@@ -209,12 +219,17 @@ async function measureLatency(tries = 3) {
   return seen.length ? Math.min(...seen) : null;
 }
 
-/* Download: parallel streams, timed from the first response byte to the last. */
-async function measureDownload() {
-  let best = null;
-  for (const [streams, bytes] of DOWN_STEPS) {
-    if (spent + streams * bytes > MAX_BYTES) break; // stay inside the budget
+/* A sample is only trusted once it is long enough to mean something: past TCP
+   slow start (eight round trips) and past Wi-Fi jitter (0.6s). Measured on a
+   35/12 Mbps line, 0.3–0.8s samples scattered from 16 to 44 Mbps down and 8 to
+   23 up across back-to-back runs; curl moving 10 MB read 34–36 every time. */
+const TRUST_MS = 600;
+const trustAfter = (rtt) => Math.max(TRUST_MS, 8 * rtt);
 
+/* Download: parallel streams, timed from the first response byte to the last. */
+async function measureDownload(trust) {
+  let best = null;
+  for (const [streams, bytes] of steps(DOWN_STEPS)) {
     const runs = (await Promise.all(Array.from({ length: streams }, () =>
       timed(down(bytes)).then((t) => t && {
         start: t.responseStart,
@@ -224,7 +239,7 @@ async function measureDownload() {
         bytes: t.transferSize || t.encodedBodySize || bytes,
       }).catch(() => null)
     ))).filter((r) => r && r.bytes > 0 && r.start > 0);
-    if (!runs.length) continue;
+    if (!runs.length) { if (best) break; continue; } // a bigger step stalled: keep the last reading
 
     const got = runs.reduce((n, r) => n + r.bytes, 0);
     spent += got;
@@ -232,7 +247,7 @@ async function measureDownload() {
     if (windowMs <= 0) continue;
 
     best = { mbps: (got * 8) / (windowMs / 1000) / 1e6, windowMs };
-    if (windowMs >= MIN_WINDOW_MS) break;
+    if (windowMs >= trust) break;
   }
   return best;
 }
@@ -244,12 +259,13 @@ function noise(n) {
   return b;
 }
 
-/* Upload: the body goes out between requestStart and the first response byte,
-   which also holds one round trip — so the measured latency is taken off. */
-async function measureUpload(rtt) {
+/* Upload: the edge reports, in Server-Timing, how long it spent receiving the
+   body — the cleanest window there is. Without it, the body went out between
+   requestStart and the first response byte, which also holds one round trip,
+   so the measured latency is taken off. */
+async function measureUpload(rtt, trust) {
   let best = null;
-  for (const bytes of UP_STEPS) {
-    if (spent + bytes > MAX_BYTES) break;
+  for (const bytes of steps(UP_STEPS)) {
     try {
       const u = up();
       const started = performance.now();
@@ -258,12 +274,14 @@ async function measureUpload(rtt) {
       const total = t && t.responseStart > 0
         ? t.responseStart - t.requestStart
         : performance.now() - started;
-      const windowMs = total - (rtt || 0);
+      const edge = t?.serverTiming?.find((s) => s.name === "cfSpeedWorker")?.duration;
+      const windowMs = edge > 0 ? edge : total - (rtt || 0);
       if (!(windowMs > 0)) continue;
       best = { mbps: (bytes * 8) / (windowMs / 1000) / 1e6, windowMs };
-      if (windowMs >= MIN_WINDOW_MS) break;
+      if (windowMs >= trust) break;
     } catch (err) {
-      if (err && err.name === "AbortError") throw err; // a stall is a result, not a skip
+      if (best) break; // a bigger step stalled: keep the last reading
+      if (err && err.name === "AbortError") throw err; // nothing got through in time
     }
   }
   return best;
@@ -306,10 +324,11 @@ async function runTest() {
     if (rtt == null) throw new Error("edge unreachable");
     $("net-ping").textContent = `${Math.round(rtt)} ms`;
 
-    const d = await measureDownload();
+    const trust = trustAfter(rtt);
+    const d = await measureDownload(trust);
     if (!d) throw new Error("no usable sample");
     const floorD = show("net-speed", d);
-    const floorU = show("net-up", await measureUpload(rtt));
+    const floorU = show("net-up", await measureUpload(rtt, trust));
 
     lastRun = Date.now();
     $("net-status").textContent = "Online";
@@ -336,8 +355,8 @@ netBtn?.addEventListener("click", () => {
   if (!lastRun) {
     if (note && !note.textContent) {
       note.textContent = navigator.connection?.saveData
-        ? "Data Saver is on — the test uses up to ~1.6 MB"
-        : "Uses up to ~1.6 MB of data";
+        ? "Data Saver is on — the test stays under 1 MB"
+        : "Uses 1–10 MB, depending on your connection";
     }
     return;
   }

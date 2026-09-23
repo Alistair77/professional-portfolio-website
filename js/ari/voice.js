@@ -1,50 +1,71 @@
 /* Ari's voice. Not a copy of anyone's real voice: a character delivery built
-   on the browser's speech synthesis. Low and unhurried, with the rhythm from
-   the style notes — statement. beat. twist. Each line is spoken phrase by
-   phrase so the pauses are real, and the last phrase (the twist) lands a
-   beat late, a touch slower and lower. Off until the visitor turns it on. */
+   on the browser's speech synthesis. Each line goes out sentence by sentence
+   — whole sentences keep the voice's natural rise and fall, where splitting
+   at commas restarts its rhythm and sounds robotic. No two sentences land
+   exactly alike, and the last one (the twist) gets a breath before it.
+   Two characters: Soft (bright, playful) and Bold (confident). Off until
+   the visitor turns sound on. */
 
 const canSpeak = "speechSynthesis" in window;
 
-/* natural-sounding voices first; anything robotic is skipped */
-const PREFERRED = [
+/* two characters. Soft: brighter, playful, fast. Bold: lower, confident, fast. */
+const FEMALE = [
+  "Samantha", "Google US English", "Microsoft Jenny Online", "Microsoft Aria Online",
+  "Zira", "Karen", "Moira", "Tessa", "Fiona", "Veena", "Google UK English Female",
+];
+const MALE = [
   "Daniel", "Google UK English Male", "Microsoft Ryan Online", "Microsoft Guy Online",
   "Microsoft Christopher Online", "Microsoft Andrew Online", "Aaron", "Arthur", "Alex",
 ];
 const AVOID = /Fred|Albert|Bad News|Bahh|Bells|Boing|Bubbles|Cellos|Wobble|Zarvox|Trinoids|Whisper|Jester|Organ|Superstar|Ralph|Junior/i;
 
+const store = {
+  get(k) { try { return localStorage.getItem(k); } catch { return null; } },
+  set(k, v) { try { localStorage.setItem(k, v); } catch { /* private mode */ } },
+};
+
 let chosen = null;
-function pickVoice() {
+let persona = store.get("ari:voice") === "bold" ? "bold" : "soft";
+function pickVoice(names) {
   if (!canSpeak) return null;
   const all = speechSynthesis.getVoices().filter((v) => /^en/i.test(v.lang) && !AVOID.test(v.name));
-  for (const name of PREFERRED) {
+  for (const name of names) {
     const hit = all.find((v) => v.name.includes(name));
     if (hit) return hit;
   }
   return all.find((v) => /natural|enhanced|premium/i.test(v.name)) || all[0] || null;
 }
+function repick() {
+  chosen = pickVoice(persona === "soft" ? FEMALE : MALE);
+}
 if (canSpeak) {
-  chosen = pickVoice();
-  speechSynthesis.addEventListener?.("voiceschanged", () => { chosen = pickVoice(); });
+  repick();
+  speechSynthesis.addEventListener?.("voiceschanged", repick);
 }
 
-/* how long to hold after a phrase, by how it ends */
-const BEAT = { ",": 170, ".": 390, "!": 390, "?": 470, "…": 650, ":": 300, ";": 280 };
-const TWIST_BEAT = 240;
-
-/* "Technically, he built it. Practically? I run it." →
-   ["Technically,", "he built it.", "Practically?", "I run it."] */
-function phrases(text) {
-  return text
-    .replace(/\.\.\./g, "…")
-    .split(/(?<=[.!?…:;])\s+|(?<=,)\s+/)
+/* Split into sentences — one utterance each. Splitting at commas sounds
+   choppy because every utterance restarts the voice's prosody from zero;
+   sentences let it rise and fall like it means them. */
+function sentences(text) {
+  return (text.replace(/\.\.\./g, "…").match(/[^.!?…]+[.!?…]+|[^.!?…]+$/g) || [text])
     .map((p) => p.trim())
     .filter(Boolean);
 }
 
 export const voice = {
   available: canSpeak,
-  enabled: false,
+  enabled: store.get("ari:sound") !== "off",
+  setEnabled(on) {
+    this.enabled = !!on;
+    store.set("ari:sound", this.enabled ? "on" : "off");
+    if (!this.enabled) this.stop();
+  },
+  get persona() { return persona; },
+  setPersona(p) {
+    persona = p === "bold" ? "bold" : "soft";
+    store.set("ari:voice", persona);
+    repick();
+  },
   _until: 0,
   _talking: false,
   _run: 0,
@@ -55,8 +76,9 @@ export const voice = {
     if (!this.enabled || !canSpeak) return;
 
     const run = ++this._run;
-    const parts = phrases(text);
+    const parts = sentences(text);
     const last = parts.length - 1;
+    const base = persona === "soft" ? { rate: 1.08, pitch: 1.0 } : { rate: 1.0, pitch: 0.9 };
 
     const speakAt = (i) => {
       if (run !== this._run || i > last) { this._talking = false; return; }
@@ -64,18 +86,20 @@ export const voice = {
       const u = new SpeechSynthesisUtterance(p.replace(/…/g, "..."));
       if (chosen) { u.voice = chosen; u.lang = chosen.lang; }
       const twist = i === last && last > 0;
-      const question = p.endsWith("?");
-      u.rate = twist ? 0.86 : 0.93;
-      u.pitch = twist ? 0.78 : question ? 0.9 : 0.84;
+      const question = /[?]$/.test(p);
+      // human variance: no two sentences land exactly alike; pitch stays
+      // near the voice's own, because pushed pitch is what sounds robotic
+      const jitter = () => Math.random() * 0.06 - 0.03;
+      u.rate = (twist ? base.rate * 0.94 : base.rate) + jitter();
+      u.pitch = (twist ? base.pitch - 0.04 : base.pitch) + (question ? 0.06 : 0) + jitter() * 0.5;
       u.volume = 1;
       u.onstart = () => { if (run === this._run) this._talking = true; };
       u.onend = u.onerror = () => {
         if (run !== this._run) return;
         this._talking = false;
-        const next = parts[i + 1];
-        if (!next) return;
-        let hold = BEAT[p.slice(-1)] ?? 120;
-        if (i + 1 === last && last > 0) hold += TWIST_BEAT; // the beat before the twist
+        if (i >= last) return;
+        let hold = /[…?]$/.test(p) ? 320 : 200;
+        if (i + 1 === last && last > 0) hold += 180; // breath before the landing
         setTimeout(() => speakAt(i + 1), hold);
       };
       speechSynthesis.speak(u);

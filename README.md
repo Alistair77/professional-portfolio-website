@@ -136,6 +136,35 @@ frameworks, no dependencies, no build step. Wallpaper and iconography are
 hand-authored **SVG**; all motion runs on compositor-friendly properties and
 respects `prefers-reduced-motion`.
 
+### Ari + on-device decision engine — voice in, action out (local)
+
+Ari is the face, a Jev-class typed decision model is the brain: voice or
+text comes in, the engine returns a structured decision (intent + confidence
+in a single forward pass), the portfolio performs it — e.g. voice →
+decision → open the Projects window at Zetsu. No API keys, no cloud, nothing
+leaves the machine.
+
+The engine lives in this repo as a local sidecar (400M weights need Python,
+so it can't run inside static HTML), not a hosted API:
+
+```sh
+sh server/start.sh   # localhost:8000; Ari finds it automatically
+```
+
+Deterministic commands ("show me his resume", "yes", "play some music")
+answer instantly on-device; the engine handles the long tail local keywords
+miss. Without it Ari still works on local routing, and the caption under
+Ari's replies says which engine decided (`Decision engine · 91%` vs
+`local match`). Serve over `localhost`/HTTPS and use Chrome/Edge for the
+mic — other browsers disable it.
+
+Ari speaks from the start (speaker icon in the menu bar mutes); the hover
+card says so. The mic button is a 44px target expanding into a live
+equaliser + timer while listening (tap again to stop). Voice toggles between
+**Soft** (bright, playful, fast) and **Bold** (confident, fast); Ari opens
+apps tiled beside itself, never on top, and small talk (greetings, thanks,
+goodbyes, jokes) answers in character.
+
 ### Credit
 
 The interface is a tribute to the **macOS** desktop — its menu bar, dock and

@@ -5,7 +5,10 @@
 import { openApp, focusWindow, besideAri, resetSize } from "../wm.js";
 import { createFigure } from "./figure.js";
 import { voice } from "./voice.js";
-import { LINES, CHIPS, LABEL, LINKS, PANE, PANE_NODE, ROUTES, MORE, greeting } from "./lines.js";
+import { decide } from "./decide.js";
+import { micSupported, listenOnce, stopListening } from "./mic.js";
+import { LINES, CHIPS, LABEL, LINKS, PANE, PANE_NODE, MORE, greeting, GITHUB, LINKEDIN } from "./lines.js";
+import { PROJECTS } from "../projects.js";
 
 const RM = matchMedia("(prefers-reduced-motion: reduce)").matches;
 const clamp = (v, a = -1, b = 1) => Math.max(a, Math.min(b, v));
@@ -16,6 +19,8 @@ const pointer = { x: innerWidth / 2, y: innerHeight / 2, moved: 0 };
 addEventListener("pointermove", (e) => { pointer.x = e.clientX; pointer.y = e.clientY; pointer.moved = performance.now(); });
 
 const LIST_W = 320; // Projects as a narrow list beside Ari, like the concept
+const PHONE = matchMedia("(max-width: 760px)"); // the css/mobile.css breakpoint
+const AI_WORK = PROJECTS.filter((p) => p.group === "ai");
 
 let win = null, fig = null, canvas = null, ui = null;
 let body = "tee", running = false, level = 0;
@@ -29,11 +34,34 @@ const projectsWin = () => document.querySelector('.window[data-app="projects"]')
 /* narrow Projects hides its detail pane (css/ari.css) until the green button opens it out */
 const isList = (pw) => !!pw && !pw.hidden && getComputedStyle(pw.querySelector(".content")).display === "none";
 
+/* which app window a node opens (projects panes go through PANE instead) */
+const APP = { resume: "resume", contact: "contact", terminal: "terminal", about: "about" };
+/* confirm-to-open: github/linkedin ask first, yesOpen/noThanks resolve it */
+const PENDING = { for: null };
+
+/* open an app tiled beside Ari — never dropped on top of it. On phones
+   windows stack full-screen, so besideAri declines and it opens normally. */
+function openBeside(id, width) {
+  const el = openApp(id);
+  if (el && besideAri(el, width)) focusWindow(win);
+  return el;
+}
+
 /* ── talking ── */
 function go(id, { fromPanel = false } = {}) {
   if (!ui) return;
+  if (id === "yesOpen" && !PENDING.for) id = "yesOpenIdle";
   const points = Object.hasOwn(PANE, id);
   if (points && !fromPanel) showProject(PANE[id]);
+  if (Object.hasOwn(APP, id)) openBeside(APP[id], 620);
+  if (id === "music") document.dispatchEvent(new CustomEvent("ari:toggle-music"));
+  if (id === "github" || id === "linkedin") PENDING.for = id;
+  else if (id !== "yesOpen" && id !== "noThanks") PENDING.for = null;
+  if (id === "yesOpen") {
+    window.open(PENDING.for === "linkedin" ? LINKEDIN : GITHUB, "_blank", "noopener");
+    PENDING.for = null;
+  }
+  if (id === "noThanks") PENDING.for = null;
   let text = id === "start" ? greeting() : pick(LINES[id]);
   if (id === "hint") hinted = true;
   else if (!hinted && (points || id === "other") && isList(projectsWin())) {
@@ -82,6 +110,7 @@ function say(text, chips) {
 
 /* open the real Projects window beside Ari (never over it), at the right pane */
 function showProject(pane) {
+  if (PHONE.matches) { showStrip(pane); return; } // a phone window would cover Ari
   const pw = openApp("projects");
   if (!pw) return;
   if (pane) {
@@ -91,6 +120,32 @@ function showProject(pane) {
   }
   if (besideAri(pw, LIST_W)) focusWindow(win); // phones stack windows: Projects stays in front
   glance(pw);
+}
+
+/* phones: the AI work as a slim sideways strip on top of Ari, the pane's pill lit */
+function showStrip(pane) {
+  const strip = win.querySelector(".ari-strip");
+  strip.hidden = false;
+  for (const b of strip.querySelectorAll(".strip-pill")) {
+    const on = b.dataset.pane === pane;
+    b.setAttribute("aria-pressed", String(on));
+    // not scrollIntoView: it also scrolls every ancestor, and the desktop layer is
+    // overflow:hidden but still scrollable, so the whole window slides off screen
+    if (on) strip.scrollTo({ left: b.offsetLeft - (strip.clientWidth - b.offsetWidth) / 2, behavior: RM ? "auto" : "smooth" });
+  }
+}
+
+function stripPill(p) {
+  const b = document.createElement("button");
+  b.type = "button";
+  b.className = "strip-pill";
+  b.dataset.pane = p.id;
+  b.setAttribute("aria-pressed", "false");
+  const dot = document.createElement("i");
+  dot.style.background = `linear-gradient(160deg, ${p.accent[0]}, ${p.accent[1]})`;
+  b.append(dot, p.name);
+  b.addEventListener("click", () => { showStrip(p.id); go(PANE_NODE[p.id], { fromPanel: true }); });
+  return b;
 }
 
 function glance(el) {
@@ -118,7 +173,128 @@ document.addEventListener("click", (e) => {
   if (node) go(node, { fromPanel: true });
 });
 
-/* ── mounting: the window is rebuilt from its template on every open ── */
+/* ── asking: voice or text in -> decision -> UI action ──
+   The decision engine is the brain, Ari is the face. decide() answers from
+   local commands first and asks the on-device backend for the long tail,
+   so intelligence degrades gracefully instead of breaking. */
+async function ask(text, { via = "text" } = {}) {
+  const q = String(text || "").trim();
+  if (!q || !ui) return;
+  // thinking state: bouncing dots + the status-bar orb shimmers till it answers
+  ui.line.innerHTML = '<span class="think" aria-label="Thinking"><i></i><i></i><i></i></span>';
+  document.getElementById("ari-orb")?.classList.add("thinking");
+  if (ui.src) ui.src.textContent = via === "voice" ? `Heard “${q}” — thinking…` : "Thinking…";
+  try {
+    const { node, source, confidence } = await decide(q);
+    document.getElementById("ari-orb")?.classList.remove("thinking");
+    if (ui.src) {
+      const brain = source.startsWith("laya");
+      const engine = brain
+        ? `Decision engine${confidence ? ` · ${Math.round(confidence * 100)}%` : ""}`
+        : "local match";
+      // voice always shows what was heard; typed input only name-drops the engine
+      ui.src.textContent = via === "voice" ? `Heard “${q}” · ${engine}` : (brain ? engine : "");
+    }
+    go(node);
+  } catch {
+    document.getElementById("ari-orb")?.classList.remove("thinking");
+    if (ui.src) ui.src.textContent = "";
+    go("fallback");
+  }
+}
+
+let micBusy = false;
+const fmtT = (ms) => `0:${String(Math.floor(ms / 1000)).padStart(2, "0")}`;
+function setMicLive(on, btn) {
+  for (const b of [btn, document.getElementById("ari-mic"), win?.querySelector(".d-mic")].filter(Boolean)) {
+    b.setAttribute("aria-pressed", String(on));
+    b.classList.toggle("listening", on);
+    if (b.classList.contains("d-mic")) b.classList.toggle("live", on);
+  }
+}
+async function talkOnce(btn) {
+  if (micBusy) { stopListening(); return; } // second tap stops
+  if (!micSupported) return;
+  micBusy = true;
+  const t0 = Date.now();
+  setMicLive(true, btn);
+  const tick = setInterval(() => {
+    const label = `Listening… ${fmtT(Date.now() - t0)} — tap the mic to stop.`;
+    if (ui?.src) ui.src.textContent = label;
+    win?.querySelectorAll(".d-mic .t").forEach((el) => (el.textContent = fmtT(Date.now() - t0)));
+  }, 500);
+  try {
+    const heard = await listenOnce();
+    if (ui) {
+      const input = win.querySelector(".d-ask input");
+      if (input) input.value = heard;
+    }
+    await ask(heard, { via: "voice" });
+  } catch (err) {
+    // no-speech / timeout / denied: say what happened in the caption,
+    // not the fallback line — that line means "heard but unanswered"
+    if (!ui) return;
+    const msg = String(err?.message || "");
+    if (ui.src) {
+      ui.src.textContent =
+        msg === "not-allowed" || msg === "service-not-allowed"
+          ? "Mic blocked — allow microphone access, or type instead."
+          : "Didn't catch that — try again, or type instead.";
+    }
+    if (msg !== "no-speech" && msg !== "timeout" && msg !== "aborted") go("fallback");
+  } finally {
+    clearInterval(tick);
+    setMicLive(false, btn);
+    micBusy = false;
+  }
+}
+
+/* one switch for both sound buttons (menu bar + in-app): they always agree */
+function setSound(on) {
+  voice.setEnabled(on);
+  const label = voice.enabled ? "Mute Ari" : "Let Ari speak";
+  if (ui?.sound) {
+    ui.sound.setAttribute("aria-pressed", String(voice.enabled));
+    ui.sound.setAttribute("aria-label", label);
+  }
+  const mb = document.getElementById("ari-sound");
+  if (mb) {
+    mb.setAttribute("aria-pressed", String(voice.enabled));
+    mb.setAttribute("aria-label", label);
+    mb.classList.toggle("is-off", !voice.enabled);
+    mb.querySelector(".snd-on")?.toggleAttribute("hidden", !voice.enabled);
+    mb.querySelector(".snd-off")?.toggleAttribute("hidden", voice.enabled);
+  }
+  return voice.enabled;
+}
+document.getElementById("ari-sound")?.addEventListener("click", () => {
+  if (setSound(!voice.enabled)) openApp("ari");
+});
+setSound(voice.enabled); // paint the menu icon from the stored preference
+
+/* status-bar mic wants listening even if Ari just opened: flag survives remount */
+let pendingMic = false;
+if (!micSupported) {
+  document.getElementById("ari-mic")?.setAttribute("disabled", "");
+  document.getElementById("ari-mic")?.setAttribute("title", "Voice input not supported in this browser");
+}
+document.getElementById("ari-mic")?.addEventListener("click", () => {
+  const w = document.querySelector('.window[data-app="ari"]');
+  if (!w || w.hidden) openApp("ari");
+  else focusWindow(w);
+  // ui may not exist yet (window mounts on app:open): defer to the mount handler
+  if (!win || !ui) pendingMic = true;
+  else talkOnce(win.querySelector(".d-mic"));
+});
+document.addEventListener("ari:listening", (e) => {
+  const on = !!e.detail?.on;
+  document.getElementById("ari-mic")?.classList.toggle("listening", on);
+});
+document.addEventListener("ari:hearing", (e) => {
+  if (!win || !ui) return;
+  const input = win.querySelector(".d-ask input");
+  if (input && e.detail) input.value = e.detail.final || e.detail.interim || input.value;
+});
 document.addEventListener("app:open", (e) => {
   if (e.detail !== "ari") return;
   win = document.querySelector('.window[data-app="ari"]');
@@ -130,11 +306,26 @@ document.addEventListener("app:open", (e) => {
     line: win.querySelector(".d-line"),
     chips: win.querySelector(".d-chips"),
     sound: win.querySelector(".ari-sound"),
+    src: win.querySelector(".d-src"),
   };
   born = bodyBorn = performance.now();
   blinkAt = born + 2400;
   full = "";
   hinted = false;
+  /* Ari takes the stage: min(78vw, 1200px) × (viewport − menubar − dock),
+     so it covers 60%+ of laptop screens without touching chrome.
+     Phones stack full-screen via CSS, so skip the maths there. */
+  if (!PHONE.matches && !win.classList.contains("maximized")) {
+    const W = Math.min(1200, Math.floor(innerWidth * 0.78));
+    const H = Math.min(860, innerHeight - 140);
+    if (W >= 480 && H >= 460) {
+      win.style.width = W + "px";
+      win.style.height = H + "px";
+      win.style.left = Math.max(14, Math.floor((innerWidth - W) / 2)) + "px";
+      win.style.top = Math.max(48, Math.floor((innerHeight - H) / 2) + 18) + "px";
+    }
+  }
+  win.querySelector(".ari-strip").append(...AI_WORK.map(stripPill));
 
   win.querySelector(".d-ask").addEventListener("submit", (ev) => {
     ev.preventDefault();
@@ -142,9 +333,22 @@ document.addEventListener("app:open", (e) => {
     const q = input.value.trim();
     input.value = "";
     if (!q) return;
-    const hit = ROUTES.find(([re]) => re.test(q));
-    go(hit ? hit[1] : "fallback");
+    ask(q);
   });
+
+  const micBtn = win.querySelector(".d-mic");
+  if (!micSupported && micBtn) micBtn.disabled = true;
+  if (micBtn && !micBtn.querySelector(".eq")) {
+    const eq = document.createElement("span");
+    eq.className = "eq";
+    eq.setAttribute("aria-hidden", "true");
+    eq.innerHTML = "<i></i><i></i><i></i><i></i><i></i>";
+    const t = document.createElement("span");
+    t.className = "t";
+    t.textContent = "0:00";
+    micBtn.append(eq, t);
+  }
+  micBtn?.addEventListener("click", () => talkOnce(micBtn));
 
   win.querySelectorAll("[data-fit]").forEach((b) => {
     b.setAttribute("aria-pressed", String(b.dataset.fit === body));
@@ -157,16 +361,34 @@ document.addEventListener("app:open", (e) => {
     });
   });
 
-  if (!voice.available) ui.sound.hidden = true;
-  ui.sound.setAttribute("aria-pressed", String(voice.enabled));
+  if (!voice.available) { ui.sound.hidden = true; document.getElementById("ari-sound").hidden = true; }
+  setSound(voice.enabled);
   ui.sound.addEventListener("click", () => {
-    voice.enabled = !voice.enabled;
-    if (voice.enabled) go("voiceOn"); else voice.stop();
-    ui.sound.setAttribute("aria-pressed", String(voice.enabled));
-    ui.sound.setAttribute("aria-label", voice.enabled ? "Mute Ari" : "Let Ari speak");
+    if (setSound(!voice.enabled)) go("voiceOn");
+  });
+
+  /* voice character: Soft (playful, fast) or Bold (confident, fast) */
+  const vbtn = win.querySelector(".ari-voice");
+  const paintVoice = () => {
+    if (!vbtn) return;
+    vbtn.textContent = voice.persona === "soft" ? "Soft" : "Bold";
+    vbtn.setAttribute("aria-label", voice.persona === "soft"
+      ? "Voice: Soft. Switch to Bold."
+      : "Voice: Bold. Switch to Soft.");
+  };
+  paintVoice();
+  vbtn?.addEventListener("click", () => {
+    voice.setPersona(voice.persona === "soft" ? "bold" : "soft");
+    paintVoice();
   });
 
   go("start");
+  if (ui.src && micSupported) ui.src.textContent = "Tap the mic and just ask — try “show me Zetsu”.";
+  if (pendingMic) {
+    pendingMic = false;
+    // let the greeting paint first, then start listening
+    setTimeout(() => talkOnce(win.querySelector(".d-mic")), 600);
+  }
   if (!running) { running = true; requestAnimationFrame(loop); }
 });
 

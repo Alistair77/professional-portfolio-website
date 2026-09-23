@@ -73,7 +73,7 @@
   <button class="mb-item mb-hide" data-menu="m-window" aria-expanded="false">Window</button>
 
   <div class="mb-right">
-    <button class="mb-icon mb-hide" id="net-btn" aria-label="Network speed" title="Check network speed">
+    <button class="mb-icon" id="net-btn" aria-label="Network speed" title="Check network speed">
       <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
         <path d="M2 8.5a15 15 0 0 1 20 0M5 12a10 10 0 0 1 14 0M8.5 15.5a5 5 0 0 1 7 0"/><circle cx="12" cy="19" r="1" fill="currentColor" stroke="none"/>
       </svg>
@@ -90,8 +90,15 @@
       <rect x="2.4" y="2.4" width="13" height="9.2" rx="2.2" fill="currentColor"/>
       <path d="M22.6 5v4a2.6 2.6 0 0 0 0-4Z" fill="currentColor" fill-opacity=".55"/>
     </svg>
+    <button class="mb-icon" id="ari-mic" aria-label="Talk to Ari" title="Talk to Ari" aria-pressed="false">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="2.5" width="6" height="11" rx="3"/><path d="M5.5 11.5a6.5 6.5 0 0 0 13 0M12 18v3.5"/></svg>
+    </button>
+    <button class="mb-icon" id="ari-sound" aria-label="Mute Ari" title="Ari voice on/off" aria-pressed="true">
+      <svg class="snd-on" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13"/></svg>
+      <svg class="snd-off" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" hidden><path d="M11 5 6 9H3v6h3l5 4z"/><path d="m22 9-6 6M16 9l6 6"/></svg>
+    </button>
     <button class="mb-icon mb-ari" id="ari-orb" aria-label="Ari" aria-pressed="false"><span class="orb"></span></button>
-    <span class="mb-clock"></span>
+    <span class="mb-clock"><span class="mb-date"></span> <span class="mb-time"></span></span>
   </div>
 </div>
 
@@ -102,6 +109,7 @@
   <p class="net-line"><span>Status</span><b id="net-status">—</b></p>
   <p class="net-line"><span>Latency</span><b id="net-ping">—</b></p>
   <p class="net-line"><span>Download</span><b id="net-speed">—</b></p>
+  <p class="net-line"><span>Upload</span><b id="net-up">—</b></p>
   <p class="net-note" id="net-note"></p>
   <button class="btn" id="net-run">Run test</button>
 </div>
@@ -454,20 +462,26 @@
   </div>
 </template>
 
-<template data-app="ari" data-title="Ari" data-width="640" data-height="480">
+<template data-app="ari" data-title="Ari" data-width="1000" data-height="700">
   <div class="ari-body">
+    <!-- phones only: "show me the work" opens this instead of Projects, which would cover Ari -->
+    <nav class="ari-strip" aria-label="AI projects" hidden><span class="strip-label">AI projects</span></nav>
     <div class="ari-dlg">
       <div class="ari-head">
         <p class="d-name">Ari</p>
+        <span class="ari-toggles">
+        <button type="button" class="ari-voice" aria-label="Switch voice character">Soft</button>
         <button type="button" class="ari-sound" aria-pressed="false" aria-label="Let Ari speak">
           <svg class="off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4z"/><path d="m22 9-6 6M16 9l6 6"/></svg>
           <svg class="on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13"/></svg>
         </button>
+        </span>
       </div>
       <p class="d-prev" aria-hidden="true"></p>
       <p class="d-line" aria-live="polite"></p>
       <div class="d-chips"></div>
-      <form class="d-ask"><input id="ask-ari" name="q" placeholder="Ask anything…" autocomplete="off" aria-label="Ask Ari"><button type="submit" aria-label="Send">↑</button></form>
+      <p class="d-src" aria-live="polite"></p>
+      <form class="d-ask"><button type="button" class="d-mic" aria-label="Talk to Ari" title="Talk to Ari"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="2.5" width="6" height="11" rx="3"/><path d="M5.5 11.5a6.5 6.5 0 0 0 13 0M12 18v3.5"/></svg></button><input id="ask-ari" name="q" placeholder="Tap the mic and ask, or type…" autocomplete="off" aria-label="Ask Ari"><button type="submit" aria-label="Send">↑</button></form>
       <div class="ari-outfit">
         <button type="button" class="fit" data-fit="tee" aria-label="T-shirt" aria-pressed="true">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><path d="M8.2 3.2 3.6 5.4 1.8 9.4l3.4 1.5 1-1.6V20.8h11.6V9.3l1 1.6 3.4-1.5-1.8-4L15.8 3.2c-.9 1.5-2.2 2.2-3.8 2.2s-2.9-.7-3.8-2.2Z"/></svg>
