@@ -1,20 +1,19 @@
 # Alistair Rodrigues
 
-**AI · Data · UX Engineer**
+**AI Engineer — LLM applications, RAG and AI agents**
 
-I build AI that ships — retrieval systems, agent pipelines, and the interfaces
-that make them usable.
+AI engineer with an MSc in Advanced Computer Science with Artificial
+Intelligence from the University of Strathclyde. I build LLM applications that
+are meant to be trusted, not just demoed: agents that ask a human before doing
+anything risky, RAG that says "I don't know" instead of guessing, and eval
+pipelines that catch regressions before they ship. A background in data analysis
+and UI/UX design means I care about the whole product, from clean data to an
+interface people can actually use.
 
 📧 [alistairar7@gmail.com](mailto:alistairar7@gmail.com) ·
 🔗 [LinkedIn](https://linkedin.com/in/alistair77) ·
-💻 [GitHub](https://github.com/Alistair77)
-
----
-
-## Education
-
-**MSc Advanced Computer Science** — University of Strathclyde
-Focus on applied AI: retrieval systems, agent architectures and evaluation.
+💻 [GitHub](https://github.com/Alistair77) ·
+📄 [Résumé (PDF)](assets/resume.pdf)
 
 ---
 
@@ -78,6 +77,19 @@ A MockJudge runs the whole pipeline offline and deterministically; 21 tests at
 
 → [github.com/Alistair77/agent-evals](https://github.com/Alistair77/agent-evals)
 
+### Jericho — Live AI Agent Dashboard
+`Claude Code` `Three.js` `JavaScript` `Web Audio API`
+
+A live 3D dashboard showing which of 30 Claude Code skills in an AI video
+workflow is running, what it's working on and how far along it is. It's wired to
+real agent activity through a Claude Code hook that records every skill start and
+finish, so the view only moves when actual work is happening. Ships as a single
+HTML file with no install or build step, and every sound is generated live in the
+browser.
+
+🔗 **[Live dashboard](https://alistair77.github.io/Jericho-Agentic-Space-Station/)**
+→ [github.com/Alistair77/Jericho-Agentic-Space-Station](https://github.com/Alistair77/Jericho-Agentic-Space-Station)
+
 ### Semantic Cache — LLMOps Layer
 `Python` `FastAPI` `FAISS` `MiniLM` `Caching`
 
@@ -127,13 +139,72 @@ through in a notebook. `Jupyter` `Python`
 
 ---
 
+## Experience
+
+### UI/UX Intern — CMS Info Systems Ltd
+*Navi Mumbai, India · Mar 2026 – Sep 2026*
+
+- Designed wireframes and interactive prototypes for internal IT tools, working
+  closely with developers so designs stayed realistic to build.
+- Ran usability reviews using heuristic evaluation and flow mapping, and turned
+  the friction points into specific redesign proposals.
+- Worked in Agile sprints, joining stand-ups and design reviews with the IT team
+  from kickoff to release.
+
+### Events Team Leader — Edinburgh International Conference Centre
+*Edinburgh, UK · Jan 2024 – Dec 2024*
+
+- Led crew teams at high-profile international conferences, handling task
+  allocation and keeping each event on schedule.
+- Acted as the main client contact on event days, resolving delegate issues and
+  escalations under pressure.
+- Reviewed post-event feedback to find recurring service gaps and fed the fixes
+  into planning for the next event.
+
+### Data Analysis Intern — Binex Controls
+*Pune, India · Dec 2022 – Jul 2023*
+
+- Cleaned and prepared datasets in Python (Pandas, NumPy), fixing missing values
+  and inconsistencies before analysis.
+- Built Matplotlib charts showing trends across datasets for internal reporting.
+- Presented findings monthly to non-technical stakeholders and worked with
+  developers to feed results into internal tools.
+
+---
+
+## Education
+
+**MSc Advanced Computer Science with Artificial Intelligence** — University of
+Strathclyde · Glasgow, UK · Jul 2025
+
+**BSc Computer Science** — Savitribai Phule Pune University · Pune, India ·
+2019 – 2022
+Relevant coursework: Data Structures, Algorithms, Machine Learning, Statistical
+Analysis, Database Systems
+
+**Secondary Schooling** — Saint Ursula's High School · Pune, India
+
+---
+
+## Volunteering
+
+**Data Volunteer, Umbrella Health Partnership** (Birmingham City Council Youth
+Service) · Aug 2023 – Present
+
+- Built the organisation's first data system, turning paper records into a clean,
+  structured dataset leadership could actually use.
+- Ran quarterly analysis on it, surfacing trends and gaps that informed
+  programme planning.
+
+---
+
 ## Skills
 
-**AI & Data** — Python · LangGraph · Claude · FAISS · BM25 · RRF · Ollama · DuckDB · K-means
-**Backend** — Python · FastAPI · PostgreSQL · Git · GitHub
-**Data & Analytics** — SQL · Pandas · NumPy · scikit-learn · Tableau · Power BI · Streamlit
-**Frontend & Product** — React · GSAP · Three.js · WebGL · HTML/CSS · Figma · UI/UX · Wireframing · Prototyping
-**People** — Agile/Scrum · Stakeholder communication · Team leadership · Empathy
+**AI & LLMs** — LLM application development · AI agents and tool use · RAG · LangGraph · Claude API · Ollama (local models) · Prompt engineering · LLM evaluation · FAISS · BM25 · RRF · K-means
+**Backend** — Python · FastAPI · REST APIs · PostgreSQL · SQL · Docker · Git · pytest
+**Frontend & Design** — React · JavaScript · HTML/CSS · Three.js · WebGL · GSAP · Figma · UI/UX design · Usability testing
+**Data** — Pandas · NumPy · scikit-learn · Matplotlib · DuckDB · Streamlit · Tableau · Power BI
+**Ways of working** — Agile/Scrum · Stakeholder communication · Team leadership
 
 ---
 
