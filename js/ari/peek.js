@@ -2,9 +2,9 @@
    The same dots as the big figure, face only: they fly in, the eyes find
    the cursor, and an invitation types itself. A click wakes Ari. */
 
-import { openApp, closeApp, isOpen } from "../wm.js";
-import { createFigure, FACE } from "./figure.js";
-import { PEEK } from "./lines.js";
+import { openApp, closeApp, isOpen } from "../wm.js?v=4";
+import { createFigure, FACE } from "./figure.js?v=4";
+import { PEEK } from "./lines.js?v=4";
 
 const RM = matchMedia("(prefers-reduced-motion: reduce)").matches;
 const HIDE_MS = 180; // long enough to cross from the button onto the card

@@ -1,7 +1,7 @@
 /* Desktop shell: clock, menu bar menus, dock magnification + state, terminal. */
 
-import { openApp, closeApp, isOpen } from "./wm.js";
-import { renderProjects } from "./projects.js";
+import { openApp, closeApp, isOpen } from "./wm.js?v=4";
+import { renderProjects } from "./projects.js?v=4";
 
 /* ---------- clock ---------- */
 /* date and time are separate so phones can show the time alone, as a phone does */

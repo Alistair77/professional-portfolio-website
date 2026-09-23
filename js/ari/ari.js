@@ -2,13 +2,13 @@
    data-app="ari">), talks in scripted lines, points at the Projects window,
    and explains whichever project the visitor picks there. */
 
-import { openApp, focusWindow, besideAri, resetSize } from "../wm.js";
-import { createFigure } from "./figure.js";
-import { voice } from "./voice.js";
-import { decide } from "./decide.js";
-import { micSupported, listenOnce, stopListening } from "./mic.js";
-import { LINES, CHIPS, LABEL, LINKS, PANE, PANE_NODE, MORE, greeting, GITHUB, LINKEDIN } from "./lines.js";
-import { PROJECTS } from "../projects.js";
+import { openApp, focusWindow, besideAri, resetSize } from "../wm.js?v=4";
+import { createFigure } from "./figure.js?v=4";
+import { voice } from "./voice.js?v=4";
+import { decide } from "./decide.js?v=4";
+import { micSupported, listenOnce, stopListening } from "./mic.js?v=4";
+import { LINES, CHIPS, LABEL, LINKS, PANE, PANE_NODE, MORE, greeting, GITHUB, LINKEDIN } from "./lines.js?v=4";
+import { PROJECTS } from "../projects.js?v=4";
 
 const RM = matchMedia("(prefers-reduced-motion: reduce)").matches;
 const clamp = (v, a = -1, b = 1) => Math.max(a, Math.min(b, v));
@@ -209,7 +209,6 @@ function setMicLive(on, btn) {
   for (const b of [btn, document.getElementById("ari-mic"), win?.querySelector(".d-mic")].filter(Boolean)) {
     b.setAttribute("aria-pressed", String(on));
     b.classList.toggle("listening", on);
-    if (b.classList.contains("d-mic")) b.classList.toggle("live", on);
   }
 }
 async function talkOnce(btn) {
@@ -219,9 +218,7 @@ async function talkOnce(btn) {
   const t0 = Date.now();
   setMicLive(true, btn);
   const tick = setInterval(() => {
-    const label = `Listening… ${fmtT(Date.now() - t0)} — tap the mic to stop.`;
-    if (ui?.src) ui.src.textContent = label;
-    win?.querySelectorAll(".d-mic .t").forEach((el) => (el.textContent = fmtT(Date.now() - t0)));
+    if (ui?.src) ui.src.textContent = `Listening… ${fmtT(Date.now() - t0)} — tap the mic to stop.`;
   }, 500);
   try {
     const heard = await listenOnce();
@@ -338,16 +335,6 @@ document.addEventListener("app:open", (e) => {
 
   const micBtn = win.querySelector(".d-mic");
   if (!micSupported && micBtn) micBtn.disabled = true;
-  if (micBtn && !micBtn.querySelector(".eq")) {
-    const eq = document.createElement("span");
-    eq.className = "eq";
-    eq.setAttribute("aria-hidden", "true");
-    eq.innerHTML = "<i></i><i></i><i></i><i></i><i></i>";
-    const t = document.createElement("span");
-    t.className = "t";
-    t.textContent = "0:00";
-    micBtn.append(eq, t);
-  }
   micBtn?.addEventListener("click", () => talkOnce(micBtn));
 
   win.querySelectorAll("[data-fit]").forEach((b) => {
