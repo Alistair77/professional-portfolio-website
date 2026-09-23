@@ -93,7 +93,28 @@
 .ari-outfit svg { width: 18px; height: 18px; display: block; }
 
 .ari-fig { position: relative; display: flex; align-items: flex-end; justify-content: center; min-height: 0; overflow: hidden; }
-.ari-fig canvas { height: 100%; width: auto; max-width: 100%; aspect-ratio: 310 / 412; display: block; }
+.ari-fig canvas { height: 100%; width: auto; max-width: 100%; aspect-ratio: 310 / 412; display: block; object-fit: contain; }
+
+/* ── narrow Ari: tiled 50/50 beside another app ──
+   A real app reflows when its window narrows instead of squeezing its
+   content. Below ~720px of window width the two-column stage stacks: the
+   figure becomes a compact head-and-shoulders banner on top (cropped, never
+   squashed) and the dialog takes the full width below. Derived from the
+   window's own width via container query — the same technique the Projects
+   list uses — so it also covers small laptops at full size. Desktop only;
+   phones keep their own stacked layout below. */
+@media (min-width: 761px) {
+  .window[data-app="ari"] { container: ari / inline-size; }
+
+  @container ari (max-width: 720px) {
+    .ari-body { grid-template-columns: 1fr; grid-template-rows: 168px minmax(0, 1fr); }
+    .ari-fig { order: -1; align-items: flex-start; }
+    .ari-fig canvas { width: 100%; height: 100%; max-width: none; aspect-ratio: auto; object-fit: cover; object-position: 50% 18%; }
+    .ari-dlg { padding: 4px 18px 14px; align-content: start; gap: 8px; min-height: 0; overflow-y: auto; }
+    .ari-dlg .d-prev { display: none; }
+    .ari-dlg .d-line { font-size: 15px; min-height: 0; }
+  }
+}
 
 /* the dock icon, and the orb beside the battery */
 .dock .glyph-ari { background: var(--ari-orb); }

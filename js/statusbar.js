@@ -381,7 +381,7 @@ addEventListener("offline", () => {
 });
 
 /* ---------- weather ----------
-   IP-based, city-level, no permission prompt. Two free no-key APIs:
+   Coarse location, no permission prompt. Two free no-key APIs:
    ipapi.co for rough location, Open-Meteo for conditions. Cached 10 min.
    Qualitative on purpose: hot / cold / humid, not a forecast. */
 
@@ -438,7 +438,7 @@ async function loadWx(force = false) {
     $("wx-place").textContent = city;
     $("wx-now").textContent = `${t}° · ${tempWord(t)}`;
     $("wx-hum").textContent = `${hum}%${hum >= 75 ? " · humid" : ""}`;
-    $("wx-note").textContent = `${tempWord(t)[0].toUpperCase() + tempWord(t).slice(1)} at your place — IP-based, city-level, no tracking`;
+    $("wx-note").textContent = `${tempWord(t)[0].toUpperCase() + tempWord(t).slice(1)} at your place — ${skyWord(code)}`;
     wxAt = Date.now();
   } catch {
     if (temp) temp.textContent = "--°";
@@ -459,8 +459,22 @@ if (!navigator.onLine) {
   loadWx(false); // one quiet lookup on load; opening the panel never refetches within TTL
 }
 
-/* ---------- copy email ---------- */
+/* ---------- copy email ----------
+   Delegated so it works for the contact window AND the menu-bar Contact menu
+   (whose content is cloned into .mb-menu at open time). */
 document.addEventListener("click", async (e) => {
+  const menuCopy = e.target.closest("[data-copy-email]");
+  if (menuCopy) {
+    const orig = menuCopy.textContent;
+    try {
+      await navigator.clipboard.writeText("alistairar7@gmail.com");
+      menuCopy.textContent = "Copied ✓";
+    } catch {
+      menuCopy.textContent = "alistairar7@gmail.com";
+    }
+    setTimeout(() => { menuCopy.textContent = orig; }, 1800);
+    return;
+  }
   if (!e.target.closest("#copy-mail")) return;
   const state = document.getElementById("copy-state");
   try {

@@ -4,3 +4,4 @@ __pycache__/
 server/__pycache__/
 server/.venv/
 .venv/
+server/visits.jsonl

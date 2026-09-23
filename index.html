@@ -71,6 +71,7 @@
   <button class="mb-item is-app" data-menu="m-app" aria-expanded="false">Alistair Rodrigues</button>
   <button class="mb-item mb-hide" data-menu="m-work" aria-expanded="false">Work</button>
   <button class="mb-item mb-hide" data-menu="m-window" aria-expanded="false">Window</button>
+  <button class="mb-item mb-hide" data-menu="m-contact" aria-expanded="false">Contact</button>
 
   <div class="mb-right">
     <button class="mb-icon" id="net-btn" aria-label="Network speed" title="Check network speed">
@@ -173,6 +174,16 @@
   <button data-action="open:ari">Ari</button>
   <hr>
   <button data-action="closeAll">Close all<kbd>⌘⌥W</kbd></button>
+</template>
+
+<template id="m-contact">
+  <button data-action="link:mailto:alistairar7@gmail.com">alistairar7@gmail.com</button>
+  <button data-copy-email>Copy email address</button>
+  <hr>
+  <button data-action="link:https://github.com/Alistair77">GitHub ↗</button>
+  <button data-action="link:https://linkedin.com/in/alistair77">LinkedIn ↗</button>
+  <hr>
+  <button data-action="open:contact">Open contact window<kbd>⌘K</kbd></button>
 </template>
 
 <!-- ═══════════ desktop ═══════════ -->
@@ -509,6 +520,7 @@
 
 <script type="module" src="js/hello.js?v=5"></script>
 <script type="module" src="js/desktop.js?v=5"></script>
+<script src="js/visit-log.js?v=6"></script>
 <script type="module" src="js/statusbar.js?v=5"></script>
 <script type="module" src="js/terminal.js?v=5"></script>
 <script type="module" src="js/ari/ari.js?v=5"></script>

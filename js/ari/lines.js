@@ -20,6 +20,7 @@ export const LABEL = {
   linkedin: "Connect on LinkedIn",
   yesOpen: "Yes, open it",
   noThanks: "No thanks",
+  skipName: "Skip",
 };
 
 /* chips starting with "@" render as real links */
@@ -41,6 +42,7 @@ export const CHIPS = {
   other: ["work", "github", "linkedin"],
   about: ["work", "linkedin", "contact"],
   contact: ["linkedin", "github", "work"],
+  askName: ["skipName"],
   github: ["yesOpen", "noThanks", "work"],
   linkedin: ["yesOpen", "noThanks", "work"],
   resume: ["work", "contact", "github"],
@@ -132,6 +134,10 @@ export const LINES = {
   contact: [
     "alistairar7@gmail.com. He replies, and fast. It's almost suspicious.",
     "Email's quickest: alistairar7@gmail.com. Or LinkedIn, if you like things formal. Rules. Thrilling.",
+  ],
+  askName: [
+    "Before I open that — what should I call you? First name's plenty, or skip and we'll carry on.",
+    "Quick one before contact — what's your name? Or tap Skip, no pressure.",
   ],
   github: [
     "GitHub. Every commit, every late-night fix, every ‘why did I name it that’. Want me to open it?",

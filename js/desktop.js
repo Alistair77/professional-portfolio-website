@@ -119,7 +119,11 @@ document.addEventListener("click", (e) => {
 addEventListener("keydown", (e) => e.key === "Escape" && current && closeMenu());
 
 function run(action) {
-  const [verb, arg] = action.split(":");
+  // split on the FIRST colon only: "link:https://…" and "link:mailto:…"
+  // both carry colons in the argument itself
+  const i = action.indexOf(":");
+  const verb = i < 0 ? action : action.slice(0, i);
+  const arg = i < 0 ? "" : action.slice(i + 1);
   if (verb === "open") openApp(arg);
   if (verb === "close") closeApp(arg);
   if (verb === "closeAll") document.querySelectorAll(".window").forEach((w) => closeApp(w.dataset.app));

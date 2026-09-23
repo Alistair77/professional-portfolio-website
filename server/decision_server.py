@@ -15,9 +15,12 @@ works with or without it.
 
 from __future__ import annotations
 
+import json
 import os
+import time
+from pathlib import Path
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Query
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
@@ -79,9 +82,56 @@ class DecideIn(BaseModel):
     text: str = Field(min_length=1, max_length=2000)
 
 
+VISIT_LOG = Path(__file__).with_name("visits.jsonl")
+VISIT_TOKEN = os.environ.get("VISIT_TOKEN", "")  # set to enable local GET /visits
+
+
+class VisitIn(BaseModel):
+    v: int = 1
+    kind: str = Field(default="visit", max_length=20)
+    ts: str = Field(default="", max_length=40)
+    tz: str = Field(default="", max_length=60)
+    lang: str = Field(default="", max_length=20)
+    ref: str = Field(default="", max_length=300)
+    path: str = Field(default="/", max_length=100)
+    screen: str = Field(default="", max_length=20)
+    human: bool = True
+    ua: str = Field(default="", max_length=160)
+    name: str = Field(default="", max_length=60)
+    cityHint: str = Field(default="", max_length=60)
+
+
 @app.get("/health")
 def health():
     return {"ok": True, "preload": PRELOAD, "threshold": CONF_THRESHOLD}
+
+
+@app.post("/visit")
+def visit(body: VisitIn):
+    """Local-dev visit log. Appends one JSON line per ping; never stores IPs.
+    Production uses server/visit-worker.js (email). This exists so `sh
+    server/start.sh` + setting the endpoint to http://localhost:8000/visit
+    lets the owner tail server/visits.jsonl while developing."""
+    try:
+        entry = body.model_dump()
+        entry["logged_at"] = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+        with VISIT_LOG.open("a", encoding="utf-8") as f:
+            f.write(json.dumps(entry, ensure_ascii=False) + "\n")
+    except Exception:
+        pass
+    return {"ok": True}
+
+
+@app.get("/visits")
+def visits(token: str = Query(default=""), limit: int = Query(default=50, le=500)):
+    """Owner-only local viewer. Disabled unless VISIT_TOKEN is set."""
+    if not VISIT_TOKEN or token != VISIT_TOKEN:
+        return {"ok": False}
+    try:
+        lines = VISIT_LOG.read_text(encoding="utf-8").splitlines()[-limit:]
+        return {"ok": True, "visits": [json.loads(x) for x in lines if x.strip()]}
+    except FileNotFoundError:
+        return {"ok": True, "visits": []}
 
 
 @app.post("/decide")

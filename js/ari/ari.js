@@ -39,6 +39,29 @@ const APP = { resume: "resume", contact: "contact", terminal: "terminal", about:
 /* confirm-to-open: github/linkedin ask first, yesOpen/noThanks resolve it */
 const PENDING = { for: null };
 
+/* visitor name: asked once, optional, on the contact flow. Stored in the
+   visitor's own browser only; forwarded to the private visit log solely when
+   the visitor volunteers it (skippable, never inferred). */
+const nameStore = {
+  get(k) { try { return localStorage.getItem(k); } catch { return null; } },
+  set(k, v) { try { localStorage.setItem(k, v); } catch { /* private mode */ } },
+};
+const visitorName = () => (nameStore.get("ari:visitor-name") || "").trim();
+const askedName = () => nameStore.get("ari:asked-name") === "1";
+const markAsked = () => nameStore.set("ari:asked-name", "1");
+let pendingName = false;
+function cleanName(raw) {
+  let s = String(raw || "").trim();
+  if (!s) return "";
+  if (/^(skip|no thanks|nope?|nah|cancel|not now)\s*[!.]?$/i.test(s)) return "";
+  s = s.replace(/^(my name is|my names?|i'm|i am|i am called|call me|it's|its|this is)\s+/i, "").trim();
+  s = s.replace(/[.!?,;:"'()]+$/g, "").trim();
+  s = s.split(/\s+/).slice(0, 2).join(" ");
+  s = s.replace(/[^A-Za-zÀ-ÿ'’\- ]/g, "").trim().slice(0, 30);
+  if (s.length < 2) return "";
+  return s;
+}
+
 const HALF_GAP = 16; // matches wm.js: windows never touch chrome or each other
 /* equal split: Ari gives up its stage width so both windows share 50-50.
    Falls back to the narrow beside-list when the screen is too small. */
@@ -72,6 +95,29 @@ function openHalf(id) {
 /* ── talking ── */
 function go(id, { fromPanel = false } = {}) {
   if (!ui) return;
+  /* contact asks for a name once, optionally: skip proceeds nameless,
+     a remembered name personalises the line instead */
+  if (id === "skipName") {
+    pendingName = false;
+    markAsked();
+    PENDING.for = null;
+    openHalf(APP.contact);
+    say(pick(LINES.contact), CHIPS.contact);
+    return;
+  }
+  if (id === "contact" && !pendingName && !visitorName() && !askedName()) {
+    pendingName = true;
+    markAsked();
+    PENDING.for = null;
+    openHalf(APP.contact);
+    say(pick(LINES.askName), CHIPS.askName);
+    return;
+  }
+  if (id === "contact" && visitorName()) {
+    openHalf(APP.contact);
+    say(`For you, ${visitorName()} — ${pick(LINES.contact)}`, CHIPS.contact);
+    return;
+  }
   if (id === "yesOpen" && !PENDING.for) id = "yesOpenIdle";
   const points = Object.hasOwn(PANE, id);
   if (points && !fromPanel) showProject(PANE[id]);
@@ -202,6 +248,33 @@ document.addEventListener("click", (e) => {
 async function ask(text, { via = "text" } = {}) {
   const q = String(text || "").trim();
   if (!q || !ui) return;
+  /* awaiting a volunteered name on the contact flow: never routed, never decided */
+  if (pendingName) {
+    pendingName = false;
+    const named = cleanName(q);
+    if (!named) {
+      say(pick(LINES.contact), CHIPS.contact);
+    } else {
+      nameStore.set("ari:visitor-name", named);
+      try { window.__setVisitorName?.(named); } catch { /* logger absent */ }
+      try {
+        const meta = document.querySelector('meta[name="visit-endpoint"]');
+        let ep = window.__VISIT_ENDPOINT || meta?.content || "";
+        if (!ep) { try { ep = localStorage.getItem("ari:visit-endpoint") || ""; } catch { /* private mode */ } }
+        if (ep.trim()) {
+          fetch(String(ep).replace(/\/+$/, ""), {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ v: 1, kind: "name", ts: new Date().toISOString(), name: named }),
+            keepalive: true,
+            credentials: "omit",
+          }).catch(() => {});
+        }
+      } catch { /* silent */ }
+      say(`Nice to meet you, ${named}. ${pick(LINES.contact)}`, CHIPS.contact);
+    }
+    return;
+  }
   // thinking state: bouncing dots + the status-bar orb shimmers till it answers
   ui.line.innerHTML = '<span class="think" aria-label="Thinking"><i></i><i></i><i></i></span>';
   document.getElementById("ari-orb")?.classList.add("thinking");
