@@ -432,6 +432,14 @@ body.booting .desk-icons { opacity: 0; }
 .mb-icon:hover { background: rgba(255, 255, 255, 0.16); }
 .mb-icon.is-playing { color: var(--green); }
 
+/* weather: dot carries the sky, figures carry the facts */
+.mb-wx { width: auto; min-width: 26px; padding: 0 5px; gap: 4px; display: inline-flex; align-items: center; }
+.wx-dot { width: 9px; height: 9px; border-radius: 50%; background: rgba(255,255,255,.35); flex: 0 0 auto; }
+.wx-dot.sun { background: #FFD36B; box-shadow: 0 0 6px rgba(255,211,107,.8); }
+.wx-dot.cloud { background: #9AA6B8; }
+.wx-dot.rain { background: #63B3FF; box-shadow: 0 0 6px rgba(99,179,255,.8); }
+.wx-temp { font-size: 12px; font-variant-numeric: tabular-nums; }
+
 /* ---------- status popovers ---------- */
 .popover {
   position: fixed;

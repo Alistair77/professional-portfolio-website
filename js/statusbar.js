@@ -380,6 +380,85 @@ addEventListener("offline", () => {
   lastRun = 0;
 });
 
+/* ---------- weather ----------
+   IP-based, city-level, no permission prompt. Two free no-key APIs:
+   ipapi.co for rough location, Open-Meteo for conditions. Cached 10 min.
+   Qualitative on purpose: hot / cold / humid, not a forecast. */
+
+const wxBtn = document.getElementById("wx-btn");
+const wxPop = document.getElementById("wx-pop");
+register(wxBtn, wxPop);
+
+const WX_TTL_MS = 600_000;
+let wxAt = 0, wxBusy = false;
+
+const tempWord = (t) =>
+  t >= 30 ? "hot" : t >= 24 ? "warm" : t >= 17 ? "mild" :
+  t >= 10 ? "cool" : t >= 3 ? "chilly" : "cold";
+const skyWord = (c) =>
+  c === 0 ? "clear skies" : c <= 2 ? "partly cloudy" : c === 3 ? "overcast" :
+  c === 45 || c === 48 ? "foggy" : c >= 95 ? "stormy" :
+  c >= 71 && c <= 77 ? "snowy" : "rainy";
+const skyClass = (c) =>
+  c === 0 || c === 1 ? "sun" : c >= 51 ? "rain" : "cloud";
+
+async function json(url, ms = 6000) {
+  const ctl = new AbortController();
+  const timer = setTimeout(() => ctl.abort(), ms);
+  try {
+    const res = await fetch(url, { signal: ctl.signal });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return await res.json();
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+async function loadWx(force = false) {
+  if (wxBusy || (!force && Date.now() - wxAt < WX_TTL_MS)) return;
+  wxBusy = true;
+  const dot = wxBtn?.querySelector(".wx-dot");
+  const temp = wxBtn?.querySelector(".wx-temp");
+  try {
+    // rough location from the network itself; falls back to a second provider
+    const loc = await json("https://ipapi.co/json/").catch(() => json("http://ip-api.com/json/"));
+    const lat = Number(loc?.latitude ?? loc?.lat), lon = Number(loc?.longitude ?? loc?.lon);
+    const city = loc?.city || loc?.regionName || "nearby";
+    if (!Number.isFinite(lat) || !Number.isFinite(lon)) throw new Error("no location");
+    const wx = await json(
+      `https://api.open-meteo.com/v1/forecast?latitude=${lat.toFixed(2)}&longitude=${lon.toFixed(2)}` +
+      `&current=temperature_2m,relative_humidity_2m,weather_code&timezone=auto`
+    );
+    const cur = wx?.current || {};
+    const t = Math.round(cur.temperature_2m), hum = Math.round(cur.relative_humidity_2m), code = cur.weather_code ?? 2;
+    const line = `${tempWord(t)} in ${city} — ${t}°, ${hum >= 75 ? "humid, " : ""}${skyWord(code)}`;
+    if (temp) temp.textContent = `${t}°`;
+    if (dot) dot.className = `wx-dot ${skyClass(code)}`;
+    wxBtn?.setAttribute("aria-label", `Weather: ${line}`);
+    $("wx-place").textContent = city;
+    $("wx-now").textContent = `${t}° · ${tempWord(t)}`;
+    $("wx-hum").textContent = `${hum}%${hum >= 75 ? " · humid" : ""}`;
+    $("wx-note").textContent = `${tempWord(t)[0].toUpperCase() + tempWord(t).slice(1)} at your place — IP-based, city-level, no tracking`;
+    wxAt = Date.now();
+  } catch {
+    if (temp) temp.textContent = "--°";
+    $("wx-place").textContent = "—";
+    $("wx-now").textContent = "n/a";
+    $("wx-hum").textContent = "n/a";
+    $("wx-note").textContent = "Couldn't reach the weather service";
+  } finally {
+    wxBusy = false;
+  }
+}
+
+$("wx-run")?.addEventListener("click", () => loadWx(true));
+wxBtn?.addEventListener("click", () => { if (!wxPop.hidden) loadWx(false); });
+if (!navigator.onLine) {
+  $("wx-note").textContent = "Offline";
+} else {
+  loadWx(false); // one quiet lookup on load; opening the panel never refetches within TTL
+}
+
 /* ---------- copy email ---------- */
 document.addEventListener("click", async (e) => {
   if (!e.target.closest("#copy-mail")) return;

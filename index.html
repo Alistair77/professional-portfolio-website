@@ -90,6 +90,9 @@
       <rect x="2.4" y="2.4" width="13" height="9.2" rx="2.2" fill="currentColor"/>
       <path d="M22.6 5v4a2.6 2.6 0 0 0 0-4Z" fill="currentColor" fill-opacity=".55"/>
     </svg>
+    <button class="mb-icon mb-wx" id="wx-btn" aria-label="Local weather" title="Local weather">
+      <span class="wx-dot" aria-hidden="true"></span><span class="wx-temp">--°</span>
+    </button>
     <button class="mb-icon" id="ari-mic" aria-label="Talk to Ari" title="Talk to Ari" aria-pressed="false">
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="2.5" width="6" height="11" rx="3"/><path d="M5.5 11.5a6.5 6.5 0 0 0 13 0M12 18v3.5"/></svg>
     </button>
@@ -112,6 +115,15 @@
   <p class="net-line"><span>Upload</span><b id="net-up">—</b></p>
   <p class="net-note" id="net-note"></p>
   <button class="btn" id="net-run">Run test</button>
+</div>
+
+<div class="popover" id="wx-pop" hidden>
+  <h4>Weather</h4>
+  <p class="net-line"><span>Place</span><b id="wx-place">—</b></p>
+  <p class="net-line"><span>Now</span><b id="wx-now">—</b></p>
+  <p class="net-line"><span>Humidity</span><b id="wx-hum">—</b></p>
+  <p class="net-note" id="wx-note"></p>
+  <button class="btn" id="wx-run">Refresh</button>
 </div>
 
 <div class="popover" id="music-pop" hidden>
