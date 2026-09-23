@@ -21,6 +21,8 @@ export const LABEL = {
   yesOpen: "Yes, open it",
   noThanks: "No thanks",
   skipName: "Skip",
+  joke: "Tell me a joke",
+  music: "Play some music",
 };
 
 /* chips starting with "@" render as real links */
@@ -253,11 +255,13 @@ export const MORE = {
     "The long version. Vector search and keyword search run side by side, a reranker keeps only the best, and every answer cites its source. Can't answer? It refuses, and never even calls the model. Principled. I find that attractive.",
     "All of it, then. No API keys, nothing leaves your machine, and every retrieval stage is on screen in its own colour. The demo runs the real pipeline right in your browser. Show-off. I approve.",
     "It grades itself twice now. Once for citing its sources, once for actually being right. Because a wrong fact, beautifully cited, is still wrong. Harsh. Fair. Mostly harsh.",
+    "It rewrites your question before searching — “PTO policy” used to find nothing, now it finds everything. Streams the answer, caches the repeats, and measured its own decomposition feature at zero wins and switched it off. Discipline.",
   ],
   zetsu: [
     "Here's the rest. Say the wake word once and it keeps listening. Real echo cancellation, so it never interrupts itself. Anything risky gets stopped and asked about first. Polite and paranoid. My favourite combination.",
     "The details. Text agent first, voice layered on top, so the logic never forks. There's even a self-test that runs with no mic, no model and no network. Built to be debugged. More than most of us can say.",
     "Twenty tools now. Your calendar, your reminders, your inbox, even your screen. It can draft an email but never send one. Not a permission it lacks, a capability that doesn't exist. Restraint. I've heard of it.",
+    "These days there's a dashboard too — a live ring for what it's doing, plus the audit trail. And a heartbeat that checks things on its own schedule. It's getting independent. I'm watching it.",
   ],
   orchestrator: [
     "The full story. The model can only ask for an action. The harness decides, runs it, and writes it down. Every step is replayable months later. No mysteries. Honestly, I find that a little unsettling.",

@@ -40,12 +40,15 @@ pipeline in WASM, in your browser
 
 A voice-first assistant running entirely on your own machine — no API keys, no
 accounts, no audio leaving the laptop. Say the wake word once and it keeps
-listening for follow-ups; talk over it and it stops mid-word in 85ms. Real echo
-cancellation means it recognises its own output instead of interrupting itself.
-A safety gate stops every consequential action and asks first, prompt injection
-is screened and logged, and everything lands in an audit trail. Built text-first
-with voice as a layer that never forks the logic, so the text path always works
-and a self-test runs with no mic, model or network.
+listening for follow-ups with no fixed windows (about 500ms heard-to-heard);
+talk over it and it stops mid-word in 85ms. Real echo cancellation means it
+recognises its own output instead of interrupting itself. A safety gate stops
+every consequential action and asks first, prompt injection is screened and
+logged, and everything lands in an audit trail. Local qwen2.5:3b by default
+with Claude CLI escalation on demand, a local dashboard, a scheduled heartbeat,
+and 39 regression tests. Built text-first with voice as a layer that never
+forks the logic, so the text path always works and a self-test runs with no
+mic, model or network.
 
 → [github.com/Alistair77/zetsu-voice-agent](https://github.com/Alistair77/zetsu-voice-agent)
 
@@ -70,6 +73,8 @@ samples the most representative case per cluster plus every high-risk run. A
 judge writes the correct answer and a grading rubric for each, forming a golden
 set; new versions are scored 1–5 on correctness, groundedness and safety. Results
 land in DuckDB and surface in a Streamlit dashboard with per-failure drilldown.
+A MockJudge runs the whole pipeline offline and deterministically; 21 tests at
+95% coverage.
 
 → [github.com/Alistair77/agent-evals](https://github.com/Alistair77/agent-evals)
 
@@ -81,6 +86,7 @@ cache instead of calling the model. Prompts are embedded locally and searched
 against a FAISS index; on L2-normalised vectors, inner product is cosine
 similarity, so anything above the threshold returns cached. Entries carry a TTL
 with lazy expiry, and metrics report hit rate, latency and tokens and cost saved.
+Benchmarked at 64% hit rate with ~18× faster hits.
 The agent run endpoint is deliberately not proxied — agent runs mutate state, so
 replaying a cached response would skip real side effects.
 

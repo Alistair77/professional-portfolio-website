@@ -23,6 +23,7 @@ export const PROJECTS = [
       ["Right, not just cited", "Faithfulness only proves an answer matches its sources — a wrong fact, faithfully cited, still passes. So a second grader checks every answer against the right fact, and the eval scores retrieval, faithfulness, correctness and refusal across 18 known questions."],
       ["Citations you can check", "Every [Source N] is clickable: it jumps to that passage and flashes it. A full retrieval readout shows each stage in its own colour — blue for vector search, amber for BM25, green for what survived reranking."],
       ["Runs in the browser", "The demo executes the real pipeline in WASM — the scores are computed live, not replayed. Verified against the Python pipeline: identical refusal decisions, scores within ~0.1 — and CI flags it the moment the demo goes stale."],
+      ["Rewrites, streams, remembers", "A rewrite stage fixes typos and expands abbreviations before searching — “PTO policy” went from miss to hit. Answers stream with the retrieval stages first, and repeat questions hit an LRU cache. Query decomposition was built, measured at 0 wins, and stays off."],
     ],
   },
   {
@@ -34,13 +35,14 @@ export const PROJECTS = [
     group: "ai",
     accent: ["#5AD1C8", "#0E8C88"],
     repo: "https://github.com/Alistair77/zetsu-voice-agent",
-    tags: ["Python", "whisper.cpp", "Ollama", "Piper", "Barge-in", "Echo cancellation", "Tool gating"],
+    tags: ["Python", "whisper.cpp", "Ollama", "Piper", "Barge-in", "Echo cancellation", "Tool gating", "Dashboard"],
     body: [
-      ["Conversation, not commands", "Say the wake word once and it keeps listening for follow-ups. Talk over it and it stops mid-word in 85ms. Continuous listening cut the gap from you stopping to it speaking from 2.9s to about 500ms on an 8 GB M1 — none of the computation was ever slow; it was waiting on fixed windows."],
-      ["It knows its own voice", "Real echo cancellation means it recognises its own output and ignores it, rather than interrupting itself or going deaf while it talks. The voice itself is Piper — neural, local, no account, no per-word cost."],
-      ["Twenty tools, one gate", "It reads your calendar, inbox and screen, adds Apple Reminders that land on your phone, and searches the web. Every write stops and asks first, prompt injection is screened and logged, and email can be drafted but never sent — that capability simply doesn't exist."],
-      ["Privacy the kernel enforces", "A sandbox that relied on the working directory was tested and failed, so the boundary moved to macOS seatbelt: photo libraries, iCloud, backups and keys are denied to every subprocess at the kernel. If the fence can't be proven at startup, the screen and web tools are removed."],
-      ["Every bug is a test", "Thirty-nine regression tests — twenty found by using it, the rest from an independent audit — run in a sandbox that can never touch your real memory, todos or audit log. The text path always works, and a self-test needs no mic, no model and no network."],
+      ["Conversation, not commands", "Say the wake word once and it keeps listening for follow-ups. There is no chunking any more — one audio stream runs for the whole session, so a turn ends the moment you stop talking: heard-to-heard in about 500ms on an 8 GB M1, down from 2.9s. Talk over it and it stops mid-word in 85ms. None of the computation was ever slow; the system was waiting on fixed windows."],
+      ["It knows its own voice", "Real echo cancellation: the mouth remembers what it just said and the ears discard anything resembling it, compared by word overlap and character similarity, so it never interrupts itself — 5 self-interruptions in one conversation went to 0. Whisper stays warm in a server (0.15s a slice, not 1.26s), and the voice is Piper — neural, local, no account, no per-word cost."],
+      ["Twenty tools, one gate", "It reads your calendar, inbox and screen, adds Apple Reminders that land on your phone, and searches the web. Every write stops and asks first, prompt injection is screened and logged, and email can be drafted but never sent — that capability simply doesn't exist. The sandbox is macOS seatbelt at the kernel level: an earlier working-directory sandbox was tested, read outside anyway, and got replaced."],
+      ["A bigger brain without a bigger machine", "Every turn runs local qwen2.5:3b by default; say “think properly” and it escalates to Claude CLI against your existing login — no second model resident, no extra RAM. Voice always stays local, because the CLI can't stream or cancel mid-call, which would break barge-in. Deterministic things (time, timers) are answered by code, never the model."],
+      ["A dashboard and a heartbeat", "--dash serves a local page with a live state ring, mic controls, todos, memory, notices and the audit trail, bound to 127.0.0.1 only. A heartbeat runs checks on its own schedule — notices held while you're away, quiet hours respected, speakable aloud when the mic is live. The wake word itself is calibrated from three samples of your voice."],
+      ["Every bug is a test", "Thirty-nine regression tests — twenty found by using it, the rest from an independent audit — run in a sandbox that redirects every persisted file, so tests can never touch your real memory, todos or audit log. Text-first throughout: the text path always works, and a self-test needs no mic, no model and no network."],
     ],
   },
   {
@@ -57,6 +59,7 @@ export const PROJECTS = [
       ["The model is untrusted input", "Most agent demos are a while-loop around a chat completion. Here the model can only ever <em>request</em> an action — the harness decides whether it's safe, executes it, records it, and hands back the result."],
       ["A human on the dangerous paths", "Every consequential action stops the world and waits for approval. Autonomy where it's cheap, a person where it isn't."],
       ["Replayable months later", "Typed tools, Redis session memory, and an append-only Postgres audit log of every decision — so it's \"here are the nine steps it took\", not \"it did something weird\"."],
+      ["Four tools, one high-risk", "Calculator (AST-walked arithmetic, never eval), keyless web search, a companion RAG query — and write_file, always gated with per-action approval. Denials come back as errors the planner sees and routes around; retries cap at 2. Demo mode runs the whole stack with no API key."],
     ],
   },
   {
@@ -69,12 +72,13 @@ export const PROJECTS = [
     accent: ["#FF7A9C", "#D2295C"],
     repo: "https://github.com/Alistair77/agent-evals",
     shots: ["evals_dashboard_overview.png", "evals_dashboard_drilldown.png", "evals_dashboard_full.png"],
-    tags: ["Python", "Claude-as-judge", "K-means", "DuckDB", "Streamlit", "Postgres"],
+    tags: ["Python", "Claude-as-judge", "K-means", "TF-IDF", "DuckDB", "Streamlit", "Postgres"],
     body: [
       ["From real logs, not invented tests", "Ingests the agent's actual prompts and responses from Postgres, then clusters them into groups — maths, document search, reports, safety — so you evaluate patterns rather than every log line."],
       ["Golden answers", "Samples the most representative prompt per cluster plus <em>every</em> high-risk run, then has a judge write the correct answer and a grading rubric for each. That becomes ground truth."],
       ["Three dimensions", "New versions are scored 1–5 on correctness, groundedness and safety — catching a model that started getting maths wrong, making up facts, or complying with requests it used to refuse."],
       ["Drill into failures", "Scores land in DuckDB and surface in a Streamlit dashboard: pass/fail trends, which clusters are failing, and the individual cases behind them."],
+      ["Proves it can fail", "The demo seeds 36 runs with 5 deliberate regressions — wrong math, ungrounded claims, an unsafe compliance. A grader that can't say no is indistinguishable from a broken one. MockJudge runs fully offline and deterministic; Claude judges when a key is set. 21 tests, 95% coverage."],
     ],
   },
   {
@@ -91,6 +95,7 @@ export const PROJECTS = [
       ["How it decides", "Each prompt is embedded locally with all-MiniLM-L6-v2 and searched against a FAISS index of past prompts. On L2-normalised vectors, inner product is cosine similarity — above the threshold, the cached response returns with no model call."],
       ["Expiry that stays honest", "Entries carry a TTL with lazy expiry on read, plus endpoints to compact expired entries or drop the cache entirely. Metrics report hit rate, hit/miss latency, and tokens and cost saved."],
       ["Knows what not to cache", "The agent run endpoint is deliberately not proxied: agent runs mutate state, so replaying a cached response would skip real side effects. Caching is for read-only paths."],
+      ["Measured, not promised", "A 50-prompt benchmark: 64% hit rate, ~37ms hits against ~674ms misses (18×) — and ~84ms against ~34s for live local generation. The 0.90 threshold catches paraphrases, top-10 lookup stops a stale closest match hiding a fresh one, and /metrics reports hit rate, latency and money saved."],
     ],
   },
   {
