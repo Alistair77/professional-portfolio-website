@@ -46,6 +46,37 @@
   to { opacity: 0; transform: translateY(46vh) scale(0.18); }
 }
 
+/* the window layer: full-bleed so window coordinates are viewport coordinates,
+   with perspective so staged thumbnails tilt in 3D. Above the desktop icons. */
+#windows { position: absolute; inset: 0; z-index: 20; perspective: 1200px; pointer-events: none; }
+.window { pointer-events: auto; }
+
+/* Stage Manager: windows not in front become thumbnails down the left edge
+   (position and size are set from js/wm.js) */
+.window {
+  transition: translate 460ms var(--ease-snap), scale 460ms var(--ease-snap),
+    rotate 460ms var(--ease-snap), opacity 300ms var(--ease);
+}
+
+.window.staged {
+  rotate: y 28deg;
+  opacity: 0.88;
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.5);
+}
+
+/* covers the content so the whole thumbnail is one click target */
+.window.staged::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  border-radius: inherit;
+  transition: background var(--dur-fast) var(--ease);
+}
+
+.window.staged:hover { opacity: 1; }
+.window.staged:hover::after { background: rgba(255, 255, 255, 0.06); }
+
 /* unfocused windows recede */
 .window:not(.focused) { box-shadow: 0 18px 46px rgba(0, 0, 0, 0.44); }
 .window:not(.focused) .titlebar { color: var(--muted-2); }
@@ -671,3 +702,127 @@
 
 .path h3 { margin: 3px 0 5px; font-size: var(--text-base); font-weight: 650; }
 .path p { margin: 0; font-size: var(--text-sm); }
+
+/* ---------- About: System Settings layout ---------- */
+.window[data-app="about"] .sidebar { flex-basis: 224px; padding: 10px 9px; }
+.window[data-app="about"] .content { background: rgba(22, 23, 29, 0.78); }
+.window[data-app="about"] .pane { max-width: 600px; margin: 0 auto; }
+
+.sb-gap { height: 10px; }
+
+/* square app-style icon, used in the sidebar and in rows */
+.sic {
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.22);
+}
+.sic svg { width: 14px; height: 14px; }
+.sic.glyph-ari { background: var(--ari-orb); }
+
+/* the Apple-Account-style card at the top of the sidebar */
+.sb-profile { gap: 10px; padding: 8px 9px; margin-bottom: 2px; }
+.sb-who { display: grid; min-width: 0; line-height: 1.25; }
+.sb-who b { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sb-who em { font-style: normal; font-size: var(--text-xs); color: var(--muted-2); }
+.sb-profile[aria-selected="true"] em { color: rgba(255, 255, 255, 0.78); }
+
+/* photo with initials underneath — shows if assets/me.jpg is missing */
+.avatar {
+  position: relative;
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  overflow: hidden;
+  font-size: 14px;
+  font-weight: 650;
+  letter-spacing: 0;
+  color: #fff;
+  background: linear-gradient(160deg, #8E95A6, #4E5466);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.12);
+}
+.avatar img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+
+.profile { display: grid; justify-items: center; gap: 2px; margin: 6px 0 22px; text-align: center; }
+.profile .avatar { width: 96px; height: 96px; margin-bottom: 10px; font-size: 34px; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.14); }
+.content .profile h1 { margin: 0; font-size: 24px; letter-spacing: -0.02em; }
+.content .profile .role { margin: 2px 0 0; color: var(--text); font-size: 14px; }
+.content .profile .where { margin: 0; font-size: var(--text-sm); color: var(--muted-2); }
+
+/* pane header: big icon, title, one line of description */
+.phead { display: grid; justify-items: center; gap: 6px; margin: 4px 0 22px; text-align: center; }
+.phead .sic { width: 54px; height: 54px; border-radius: 13px; margin-bottom: 4px; }
+.phead .sic svg { width: 30px; height: 30px; }
+.content .phead h1 { margin: 0; font-size: 22px; letter-spacing: -0.02em; }
+.content .phead p { margin: 0; max-width: 46ch; font-size: var(--text-sm); }
+
+/* grouped inset list */
+.sgroup {
+  margin: 0 0 18px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--hair);
+  overflow: hidden;
+}
+
+.content h2.sg-label {
+  margin: 0 0 7px 4px;
+  font-size: var(--text-sm);
+  font-weight: 600;
+  letter-spacing: 0;
+  color: var(--muted-2);
+}
+
+.srow {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  width: 100%;
+  min-height: 42px;
+  padding: 8px 12px;
+  border: 0;
+  background: none;
+  color: inherit;
+  text-align: left;
+  text-decoration: none;
+  cursor: default;
+  transition: background var(--dur-fast) var(--ease);
+}
+.srow > span { flex: 1 1 auto; }
+.srow em { font-style: normal; font-size: var(--text-sm); color: var(--muted-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.content a.srow { color: inherit; }
+.content a.srow:hover { text-decoration: none; }
+a.srow:hover, button.srow:hover { background: rgba(255, 255, 255, 0.06); }
+a.srow::after, button.srow::after { content: "›"; margin-left: 2px; font-size: 17px; line-height: 1; color: var(--muted-3); }
+
+/* hairline between rows, inset to where the label starts */
+.srow + .srow { background-image: linear-gradient(var(--hair), var(--hair)); background-size: calc(100% - 45px) 1px; background-position: 45px 0; background-repeat: no-repeat; }
+
+.stext { padding: 14px 16px; }
+.stext + .stext { border-top: 1px solid var(--hair); }
+.stext p:last-child { margin-bottom: 0; }
+.stext h3 { margin: 0 0 6px; font-size: var(--text-base); font-weight: 650; }
+.stext .tags { margin-top: 2px; }
+.content .stext p { max-width: none; }
+.stext.path { margin: 0; padding: 18px 16px 0; }
+
+.scells { display: grid; grid-template-columns: repeat(3, 1fr); }
+.scells > div { display: grid; gap: 1px; padding: 12px 14px; text-align: center; }
+.scells > div + div { border-left: 1px solid var(--hair); }
+.scells b { font-size: 20px; font-weight: 680; letter-spacing: -0.03em; }
+.scells span { font-size: var(--text-xs); color: var(--muted-2); }
+
+.content .sg-foot { margin: -8px 4px 0; font-size: var(--text-sm); color: var(--muted-2); }
+
+@media (max-width: 760px) {
+  .sb-gap, .sb-profile .avatar, .sb-who em { display: none; }
+  .sb-profile { padding: 6px 13px; }
+  .window[data-app="about"] .sidebar { flex-basis: auto; padding: 8px 10px; }
+  .scells b { font-size: 17px; }
+}
