@@ -1,4 +1,5 @@
-/* Window manager: open, focus, drag, resize, minimize, maximize, close.
+/* Window manager: open, focus, drag, resize, minimize, maximize, close,
+   and a Stage Manager strip for the windows not in front.
    Windows are built from <template data-app="id"> in index.html. */
 
 const layer = document.getElementById("windows");
@@ -22,6 +23,7 @@ export function focusWindow(el) {
   if (el.dataset.z == zTop) return;
   el.style.zIndex = el.dataset.z = ++zTop;
   for (const w of open.values()) w.classList.toggle("focused", w === el);
+  stage(el);
   document.dispatchEvent(new CustomEvent("app:focus", { detail: el.dataset.app }));
 }
 
@@ -67,6 +69,8 @@ export function closeApp(id) {
   el.addEventListener("animationend", drop, { once: true });
   setTimeout(drop, 400);
   open.delete(id);
+  unstage(el);
+  layoutStrip();
   document.dispatchEvent(new CustomEvent("app:close", { detail: id }));
 }
 
@@ -161,6 +165,8 @@ function resize(grip, el) {
 }
 
 function minimize(el) {
+  unstage(el);
+  layoutStrip();
   el.classList.add("minimized");
   el.addEventListener("animationend", () => {
     el.hidden = true;
@@ -196,6 +202,65 @@ function toggleZoom(el) {
   }
   document.dispatchEvent(new CustomEvent("app:zoom", { detail: { id: el.dataset.app, on } }));
 }
+
+/* ---------- Stage Manager ----------
+   One window holds the stage; every other one shrinks into a strip down the
+   left edge, tilted back, and a click on a thumbnail swaps it in. Ari is
+   exempt — it's a companion, not a document. Phones skip it: windows are
+   full-screen sheets there. Uses the individual translate/scale/rotate
+   properties, so it never fights the transform animations above. */
+
+const staged = new Set(); // oldest first
+const THUMB_W = 150;
+const STRIP_X = 28;
+const STAGE_LEFT = STRIP_X * 2 + THUMB_W; // front windows start clear of the strip
+
+function stage(front) {
+  if (front.dataset.app === "ari") return;
+  unstage(front);
+  if (!isTouchLayout()) {
+    for (const w of open.values()) {
+      if (w !== front && w.dataset.app !== "ari" && !w.hidden && !staged.has(w)) {
+        staged.add(w);
+        w.classList.add("staged");
+      }
+    }
+  }
+  layoutStrip();
+  if (staged.size && !front.classList.contains("maximized") && front.offsetLeft < STAGE_LEFT) {
+    slide(front, Math.max(14, Math.min(STAGE_LEFT, innerWidth - front.offsetWidth - 14)), front.offsetTop);
+  }
+}
+
+function unstage(el) {
+  staged.delete(el);
+  el.classList.remove("staged");
+  el.style.translate = el.style.scale = "";
+}
+
+function layoutStrip() {
+  if (isTouchLayout()) [...staged].forEach(unstage);
+  const list = [...staged].reverse(); // most recent on top
+  const sizes = list.map((w) => {
+    const s = Math.min(THUMB_W / w.offsetWidth, 0.3);
+    return { w, s, h: w.offsetHeight * s };
+  });
+  const top = MENUBAR_H + 40;
+  const room = innerHeight - DOCK_SAFE - top;
+  const need = sizes.reduce((n, x) => n + x.h + 22, 0);
+  const k = Math.min(1, room / need); // ponytail: squeezes the gaps when many windows stack; fine for the 5 apps here
+  let y = top;
+  for (const { w, s, h } of sizes) {
+    // scale and rotate pivot on the centre, so offset for where the scaled box lands
+    const dx = STRIP_X - w.offsetLeft - (w.offsetWidth * (1 - s)) / 2;
+    const dy = y - w.offsetTop - (w.offsetHeight * (1 - s)) / 2;
+    w.style.translate = `${dx}px ${dy}px`;
+    w.style.scale = s;
+    y += (h + 22) * k;
+  }
+}
+
+addEventListener("resize", layoutStrip);
 
 /* ---------- Ari stays in view ----------
    Ari is a companion, so other windows make room for it instead of covering
