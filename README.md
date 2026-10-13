@@ -215,6 +215,23 @@ frameworks, no dependencies, no build step. Wallpaper and iconography are
 hand-authored **SVG**; all motion runs on compositor-friendly properties and
 respects `prefers-reduced-motion`.
 
+### Screenshots
+
+![Ari, the assistant drawn in light, with the Projects window docked to its left](assets/screens/ari-projects.png)
+
+Ask Ari for the work and it opens Projects beside itself — docked, never on top.
+
+| | |
+|---|---|
+| ![The desktop with the About window open](assets/screens/desktop.png) | ![The Projects window listing the AI engineering work](assets/screens/projects.png) |
+| **The desktop.** Menu bar, dock and desk icons; About opens first. | **Projects.** AI engineering up front; data/ML, mobile and web fold away. |
+| ![The Terminal window with a working prompt](assets/screens/terminal.png) | ![The résumé window showing the CV inline](assets/screens/resume.png) |
+| **Terminal.** A real prompt — type anything and it answers. | **Résumé.** The current CV, readable in-window and downloadable. |
+
+<img src="assets/screens/mobile.png" alt="The phone layout, with Ari filling a single full-bleed sheet" width="300">
+
+On a phone the desktop becomes one full-bleed sheet with touch-sized controls.
+
 ### Ari + on-device decision engine — voice in, action out (local)
 
 Ari is the face, a Jev-class typed decision model is the brain: voice or
