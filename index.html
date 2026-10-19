@@ -6,11 +6,12 @@
 <title>Alistair Rodrigues — AI + Data + UX</title>
 <meta name="description" content="Alistair Rodrigues — AI, data and UX engineer. Retrieval systems, agent pipelines, and the interfaces that make them usable.">
 <meta name="theme-color" content="#060910">
-<link rel="stylesheet" href="css/tokens.css?v=5">
-<link rel="stylesheet" href="css/desktop.css?v=5">
-<link rel="stylesheet" href="css/window.css?v=5">
-<link rel="stylesheet" href="css/mobile.css?v=5">
-<link rel="stylesheet" href="css/ari.css?v=5">
+<link rel="stylesheet" href="css/tokens.css?v=6">
+<link rel="stylesheet" href="css/desktop.css?v=6">
+<link rel="stylesheet" href="css/window.css?v=6">
+<link rel="stylesheet" href="css/settings.css?v=6">
+<link rel="stylesheet" href="css/mobile.css?v=6">
+<link rel="stylesheet" href="css/ari.css?v=6">
 </head>
 <body class="booting">
 
@@ -86,7 +87,7 @@
     <button class="mb-icon mb-chev" id="music-toggle" aria-label="Show what's playing" aria-expanded="false">
       <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
     </button>
-    <svg class="mb-hide" width="26" height="14" viewBox="0 0 26 14" fill="none" aria-hidden="true">
+    <svg class="mb-hide mb-batt" width="26" height="14" viewBox="0 0 26 14" fill="none" aria-hidden="true">
       <rect x="0.6" y="0.6" width="20" height="12.8" rx="3.6" stroke="currentColor" stroke-opacity=".5"/>
       <rect x="2.4" y="2.4" width="13" height="9.2" rx="2.2" fill="currentColor"/>
       <path d="M22.6 5v4a2.6 2.6 0 0 0 0-4Z" fill="currentColor" fill-opacity=".55"/>
@@ -287,22 +288,72 @@
 
 <!-- ═══════════ app windows ═══════════ -->
 
-<template data-app="about" data-title="About" data-width="880" data-height="580">
-  <nav class="sidebar">
-    <div class="sb-label">Alistair Rodrigues</div>
-    <button class="sb-item" data-pane="intro" aria-selected="true">Overview</button>
-    <button class="sb-item" data-pane="path">The path here</button>
-    <button class="sb-item" data-pane="how">How I work</button>
-    <button class="sb-item" data-pane="stack">Toolkit</button>
-    <div class="sb-label">Status</div>
-    <button class="sb-item" data-pane="now">Now</button>
+<template data-app="about" data-title="About" data-width="900" data-height="600" data-nav="list">
+  <nav class="sidebar set-side" aria-label="About Alistair">
+    <label class="set-search">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6"/><path d="m15 15 5 5"/></svg>
+      <input type="search" placeholder="Search" aria-label="Search About" autocomplete="off" spellcheck="false">
+    </label>
+
+    <button class="sb-item set-me" data-pane="profile" aria-selected="true">
+      <img src="assets/alistair.jpg" alt="" width="40" height="40">
+      <span><b>Alistair Rodrigues</b><small>AI Engineer · Profile</small></span>
+    </button>
+
+    <div class="set-group">
+      <button class="sb-item" data-pane="intro"><i class="si" style="--si:#8E8E93"><svg viewBox="0 0 24 24"><circle cx="12" cy="8.6" r="3.6"/><path d="M5.2 19.6a6.8 6.8 0 0 1 13.6 0z"/></svg></i>Overview</button>
+      <button class="sb-item" data-pane="path"><i class="si" style="--si:#FF9F0A"><svg viewBox="0 0 24 24" class="st"><path d="M4 18.5 9 6l5 9 2-4 4 7.5"/></svg></i>The path here</button>
+      <button class="sb-item" data-pane="how"><i class="si" style="--si:#BF5AF2"><svg viewBox="0 0 24 24" class="st"><path d="M5 7h14M5 12h14M5 17h14"/><circle cx="9" cy="7" r="1.8"/><circle cx="15" cy="12" r="1.8"/><circle cx="8" cy="17" r="1.8"/></svg></i>How I work</button>
+      <button class="sb-item" data-pane="stack"><i class="si" style="--si:#0A84FF"><svg viewBox="0 0 24 24" class="st"><path d="M14.7 5.3a4 4 0 0 0-5.2 5.2L4.5 15.5l4 4 5-5a4 4 0 0 0 5.2-5.2l-2.6 2.6-2.4-.6-.6-2.4z"/></svg></i>Toolkit</button>
+    </div>
+
+    <div class="set-group">
+      <button class="sb-item" data-pane="now"><i class="si" style="--si:#30D158"><svg viewBox="0 0 24 24" class="st"><circle cx="12" cy="12" r="7.5"/><path d="M12 8v4.2l2.8 1.8"/></svg></i>Now</button>
+    </div>
   </nav>
-  <div class="content">
-    <section class="pane" data-pane="intro">
-      <p class="eyebrow">AI · Data · UX Engineer · Glasgow</p>
-      <h1>I build LLM systems<br>that survive contact<br>with real use.</h1>
-      <p class="lede">Not demos. A LangGraph agent with human-in-the-loop safety controls. An eval pipeline that catches regressions <em>before</em> they ship. A hybrid-search RAG pipeline that ships with its own evaluation suite.</p>
-      <p>The through-line is that I don't trust a system I can't measure. Most "AI agent" projects are a loop around a chat completion and a hope. Mine treat the model as an untrusted input source — the harness decides what's safe, records what happened, and a human holds the switch on anything expensive.</p>
+  <div class="content set-content">
+    <section class="pane" data-pane="profile">
+      <div class="me-hero">
+        <img class="me-pic" src="assets/alistair.jpg" alt="Alistair Rodrigues" width="96" height="96">
+        <h1>Alistair Rodrigues</h1>
+        <p>AI Engineer — LLM applications, RAG and AI agents</p>
+        <a href="mailto:alistairar7@gmail.com">alistairar7@gmail.com</a>
+      </div>
+
+      <h3 class="set-label">Role</h3>
+      <div class="set-list">
+        <div class="set-row"><span>Role</span><b>AI Engineer</b></div>
+        <div class="set-row"><span>Focus</span><b>LLM applications, RAG and AI agents</b></div>
+        <div class="set-row"><span>Background</span><b>Data analysis and UI/UX design</b></div>
+        <div class="set-row"><span>Education</span><b>MSc Advanced Computer Science with AI · Strathclyde</b></div>
+        <div class="set-row"><span>Availability</span><b class="set-ok">Open to AI engineering roles</b></div>
+      </div>
+
+      <h3 class="set-label">Contact</h3>
+      <div class="set-list">
+        <a class="set-row go" href="mailto:alistairar7@gmail.com"><i class="si" style="--si:#0A84FF"><svg viewBox="0 0 24 24" class="st"><rect x="3.5" y="6" width="17" height="12" rx="2"/><path d="m4.2 7.2 7.8 5.8 7.8-5.8"/></svg></i><span>Email</span><b>alistairar7@gmail.com</b></a>
+        <a class="set-row go" href="https://linkedin.com/in/alistair77" target="_blank" rel="noopener"><i class="si" style="--si:#0A66C2"><svg viewBox="0 0 24 24"><path d="M5.6 4a1.9 1.9 0 1 1 0 3.8 1.9 1.9 0 0 1 0-3.8zM4 9.2h3.2V20H4zM9.4 9.2h3v1.5c.5-.9 1.7-1.8 3.4-1.8 3.6 0 4.2 2.3 4.2 5.2V20h-3.2v-5.1c0-1.2 0-2.8-1.7-2.8s-2 1.3-2 2.7V20H9.4z"/></svg></i><span>LinkedIn</span><b>in/alistair77</b></a>
+        <a class="set-row go" href="https://github.com/Alistair77" target="_blank" rel="noopener"><i class="si" style="--si:#3A3F47"><svg viewBox="0 0 24 24"><path d="M12 2.8a9.2 9.2 0 0 0-2.9 17.9c.5.1.6-.2.6-.4v-1.7c-2.6.6-3.1-1.1-3.1-1.1-.4-1.1-1-1.4-1-1.4-.8-.6.1-.6.1-.6.9.1 1.4 1 1.4 1 .8 1.4 2.2 1 2.7.8.1-.6.3-1 .6-1.2-2-.2-4.2-1-4.2-4.5 0-1 .4-1.8 1-2.5-.1-.2-.4-1.2.1-2.4 0 0 .8-.3 2.5.9a8.7 8.7 0 0 1 4.6 0c1.8-1.2 2.5-.9 2.5-.9.5 1.3.2 2.2.1 2.4.6.7 1 1.5 1 2.5 0 3.5-2.2 4.3-4.2 4.5.3.3.6.9.6 1.7v2.5c0 .2.1.5.6.4A9.2 9.2 0 0 0 12 2.8z"/></svg></i><span>GitHub</span><b>Alistair77</b></a>
+        <a class="set-row go" href="assets/resume.pdf?v=2" download="Alistair-Rodrigues-Resume.pdf"><i class="si" style="--si:#FF9F0A"><svg viewBox="0 0 24 24" class="st"><path d="M12 4v11m0 0-4.5-4.5M12 15l4.5-4.5M5 19.5h14"/></svg></i><span>Résumé</span><b>Download PDF</b></a>
+      </div>
+
+      <h3 class="set-label">Apps</h3>
+      <div class="set-list">
+        <button class="set-row go" data-open="projects"><i class="si" style="--si:linear-gradient(160deg,#63B3FF,#1668E3)"><svg viewBox="0 0 24 24"><path d="M3 6.5A1.5 1.5 0 0 1 4.5 5h4l1.7 2H19.5A1.5 1.5 0 0 1 21 8.5v9A1.5 1.5 0 0 1 19.5 19h-15A1.5 1.5 0 0 1 3 17.5Z"/></svg></i><span>Projects<small>The AI engineering work, plus data, mobile and web</small></span></button>
+        <button class="set-row go" data-open="ari"><i class="si si-ari"></i><span>Ari<small>The assistant — ask it anything about the work</small></span></button>
+        <button class="set-row go" data-open="resume"><i class="si" style="--si:linear-gradient(160deg,#FFD36B,#F0A310)"><svg viewBox="0 0 24 24"><path d="M6 2h7l5 5v15H6z" fill="#4A3200" opacity=".85"/><path d="M8.5 12h7v1.5h-7zm0 3h7v1.5h-7zm0 3h4.6v1.5H8.5z"/></svg></i><span>Résumé<small>The CV, readable in-window</small></span></button>
+        <button class="set-row go" data-open="terminal"><i class="si" style="--si:linear-gradient(160deg,#3A3F47,#15181D)"><svg viewBox="0 0 24 24" class="st" style="stroke:#7BE8A8"><path d="M5 7l4 4-4 4M12 16h7"/></svg></i><span>Terminal<small>A working prompt</small></span></button>
+        <button class="set-row go" data-open="contact"><i class="si" style="--si:linear-gradient(160deg,#6FE09A,#12A85C)"><svg viewBox="0 0 24 24" class="st"><rect x="3" y="5.5" width="18" height="13" rx="2.4"/><path d="m3.8 7 8.2 6 8.2-6"/></svg></i><span>Contact<small>Every way to reach him</small></span></button>
+      </div>
+    </section>
+
+    <section class="pane" data-pane="intro" hidden>
+      <div class="set-card set-hero">
+        <p class="eyebrow">AI · Data · UX Engineer · Glasgow</p>
+        <h1>I build LLM systems<br>that survive contact<br>with real use.</h1>
+        <p class="lede">Not demos. A LangGraph agent with human-in-the-loop safety controls. An eval pipeline that catches regressions <em>before</em> they ship. A hybrid-search RAG pipeline that ships with its own evaluation suite.</p>
+        <p>The through-line is that I don't trust a system I can't measure. Most "AI agent" projects are a loop around a chat completion and a hope. Mine treat the model as an untrusted input source — the harness decides what's safe, records what happened, and a human holds the switch on anything expensive.</p>
+      </div>
 
       <div class="quote">
         <p>I came to AI engineering from data analysis and UI/UX design. That means I'm comfortable across the data, the model <em>and</em> the interface — not just one layer of the stack.</p>
@@ -321,11 +372,12 @@
     </section>
 
     <section class="pane" data-pane="path" hidden>
-      <p class="eyebrow">Background</p>
-      <h1>The path here</h1>
-      <p class="lede">Three disciplines, in the order I picked them up — each one still doing work in how I build.</p>
+      <header class="set-intro">
+        <i class="si" style="--si:#FF9F0A"><svg viewBox="0 0 24 24" class="st"><path d="M4 18.5 9 6l5 9 2-4 4 7.5"/></svg></i>
+        <div><h2>The path here</h2><p>Three disciplines, in the order I picked them up — each one still doing work in how I build.</p></div>
+      </header>
 
-      <ol class="path">
+      <ol class="path set-card">
         <li>
           <h3>Data analysis</h3>
           <p>SQL, Pandas, scikit-learn, R, and the dashboards that carry the result — Tableau, Power BI, Streamlit. This is where I learned that a number nobody can interrogate is a number nobody should trust. It's the same instinct behind writing an eval pipeline before claiming a model improved.</p>
@@ -340,61 +392,58 @@
         </li>
       </ol>
 
-      <p>Most people in this field arrive from one direction. Arriving from three is why I tend to notice when the model is fine and the <em>retrieval</em> is broken, or when the pipeline is correct and the interface is the thing failing the user.</p>
+      <div class="set-card">
+        <p>Most people in this field arrive from one direction. Arriving from three is why I tend to notice when the model is fine and the <em>retrieval</em> is broken, or when the pipeline is correct and the interface is the thing failing the user.</p>
+      </div>
     </section>
 
     <section class="pane" data-pane="how" hidden>
-      <p class="eyebrow">Principles</p>
-      <h1>How I work</h1>
-      <p class="lede">Four things I believe strongly enough that they show up in every repository I own.</p>
+      <header class="set-intro">
+        <i class="si" style="--si:#BF5AF2"><svg viewBox="0 0 24 24" class="st"><path d="M5 7h14M5 12h14M5 17h14"/><circle cx="9" cy="7" r="1.8"/><circle cx="15" cy="12" r="1.8"/><circle cx="8" cy="17" r="1.8"/></svg></i>
+        <div><h2>How I work</h2><p>Four things I believe strongly enough that they show up in every repository I own.</p></div>
+      </header>
 
-      <h2>Measure it or don't claim it</h2>
-      <p>Every AI system I build ships with an evaluation harness — a rubric, persisted runs, and a dashboard that catches regressions. Agent Evals exists because "it feels better now" is not a metric, and because version 2 breaking something version 1 handled is the failure nobody notices until a user does.</p>
-
-      <h2>Retrieval beats a bigger prompt</h2>
-      <p>Hybrid vector and keyword search, proper reranking, deterministic chunk IDs. Most "the model is wrong" problems are retrieval problems wearing a costume. And when retrieval genuinely can't answer, the honest move is to refuse — RAGStar says so rather than inventing something, and makes no model call at all.</p>
-
-      <h2>The model is untrusted input</h2>
-      <p>It can request an action; my code decides whether to run it. Consequential actions stop and wait for a human, prompt injection gets screened and logged, and everything lands in an append-only audit trail you can replay months later.</p>
-
-      <h2>Local first, where it's possible</h2>
-      <p>RAGStar and Zetsu both run entirely on your own machine — no API keys, no accounts, nothing uploaded. Partly cost, mostly privacy: the people who most need to ask questions of their own documents are often the least able to send them somewhere else.</p>
+      <div class="set-list">
+        <div class="set-row tall"><div><b>Measure it or don't claim it</b><p>Every AI system I build ships with an evaluation harness — a rubric, persisted runs, and a dashboard that catches regressions. Agent Evals exists because "it feels better now" is not a metric, and because version 2 breaking something version 1 handled is the failure nobody notices until a user does.</p></div></div>
+        <div class="set-row tall"><div><b>Retrieval beats a bigger prompt</b><p>Hybrid vector and keyword search, proper reranking, deterministic chunk IDs. Most "the model is wrong" problems are retrieval problems wearing a costume. And when retrieval genuinely can't answer, the honest move is to refuse — RAGStar says so rather than inventing something, and makes no model call at all.</p></div></div>
+        <div class="set-row tall"><div><b>The model is untrusted input</b><p>It can request an action; my code decides whether to run it. Consequential actions stop and wait for a human, prompt injection gets screened and logged, and everything lands in an append-only audit trail you can replay months later.</p></div></div>
+        <div class="set-row tall"><div><b>Local first, where it's possible</b><p>RAGStar and Zetsu both run entirely on your own machine — no API keys, no accounts, nothing uploaded. Partly cost, mostly privacy: the people who most need to ask questions of their own documents are often the least able to send them somewhere else.</p></div></div>
+      </div>
     </section>
 
     <section class="pane" data-pane="stack" hidden>
-      <p class="eyebrow">Toolkit</p>
-      <h1>Things I reach for</h1>
-      <p>Tools are cheap; judgement isn't. This is what I'm genuinely fluent in.</p>
+      <header class="set-intro">
+        <i class="si" style="--si:#0A84FF"><svg viewBox="0 0 24 24" class="st"><path d="M14.7 5.3a4 4 0 0 0-5.2 5.2L4.5 15.5l4 4 5-5a4 4 0 0 0 5.2-5.2l-2.6 2.6-2.4-.6-.6-2.4z"/></svg></i>
+        <div><h2>Toolkit</h2><p>Tools are cheap; judgement isn't. This is what I'm genuinely fluent in.</p></div>
+      </header>
 
-      <h2>AI &amp; LLM engineering</h2>
-      <div class="tags"><span class="tag">LangGraph</span><span class="tag">Claude API</span><span class="tag">RAG</span><span class="tag">Hybrid vector + keyword search</span><span class="tag">LLM-as-judge</span><span class="tag">Agent regression testing</span><span class="tag">Ollama</span></div>
+      <h3 class="set-label">AI &amp; LLM engineering</h3>
+      <div class="set-card"><div class="tags"><span class="tag">LangGraph</span><span class="tag">Claude API</span><span class="tag">RAG</span><span class="tag">Hybrid vector + keyword search</span><span class="tag">LLM-as-judge</span><span class="tag">Agent regression testing</span><span class="tag">Ollama</span></div></div>
 
-      <h2>Backend &amp; infrastructure</h2>
-      <div class="tags"><span class="tag">Python</span><span class="tag">FastAPI</span><span class="tag">PostgreSQL</span><span class="tag">Git</span><span class="tag">GitHub</span></div>
+      <h3 class="set-label">Backend &amp; infrastructure</h3>
+      <div class="set-card"><div class="tags"><span class="tag">Python</span><span class="tag">FastAPI</span><span class="tag">PostgreSQL</span><span class="tag">Git</span><span class="tag">GitHub</span></div></div>
 
-      <h2>Data &amp; analytics</h2>
-      <div class="tags"><span class="tag">SQL</span><span class="tag">Pandas</span><span class="tag">NumPy</span><span class="tag">scikit-learn</span><span class="tag">MATLAB</span><span class="tag">Matplotlib</span><span class="tag">Seaborn</span><span class="tag">Tableau</span><span class="tag">Power BI</span><span class="tag">Streamlit</span></div>
+      <h3 class="set-label">Data &amp; analytics</h3>
+      <div class="set-card"><div class="tags"><span class="tag">SQL</span><span class="tag">Pandas</span><span class="tag">NumPy</span><span class="tag">scikit-learn</span><span class="tag">MATLAB</span><span class="tag">Matplotlib</span><span class="tag">Seaborn</span><span class="tag">Tableau</span><span class="tag">Power BI</span><span class="tag">Streamlit</span></div></div>
 
-      <h2>Frontend &amp; product</h2>
-      <div class="tags"><span class="tag">React</span><span class="tag">GSAP</span><span class="tag">Three.js</span><span class="tag">WebGL</span><span class="tag">HTML/CSS</span><span class="tag">Figma</span><span class="tag">UI/UX design</span><span class="tag">Wireframing</span><span class="tag">Prototyping</span></div>
+      <h3 class="set-label">Frontend &amp; product</h3>
+      <div class="set-card"><div class="tags"><span class="tag">React</span><span class="tag">GSAP</span><span class="tag">Three.js</span><span class="tag">WebGL</span><span class="tag">HTML/CSS</span><span class="tag">Figma</span><span class="tag">UI/UX design</span><span class="tag">Wireframing</span><span class="tag">Prototyping</span></div></div>
 
-      <h2>Working with people</h2>
-      <div class="tags"><span class="tag">Agile/Scrum</span><span class="tag">Stakeholder communication</span><span class="tag">Team leadership</span><span class="tag">Empathy</span></div>
+      <h3 class="set-label">Working with people</h3>
+      <div class="set-card"><div class="tags"><span class="tag">Agile/Scrum</span><span class="tag">Stakeholder communication</span><span class="tag">Team leadership</span><span class="tag">Empathy</span></div></div>
     </section>
 
     <section class="pane" data-pane="now" hidden>
-      <p class="eyebrow">Updated this month</p>
-      <h1>Now</h1>
-      <p class="lede">What I'm actually doing, as of right now.</p>
+      <header class="set-intro">
+        <i class="si" style="--si:#30D158"><svg viewBox="0 0 24 24" class="st"><circle cx="12" cy="12" r="7.5"/><path d="M12 8v4.2l2.8 1.8"/></svg></i>
+        <div><h2>Now</h2><p>What I'm actually doing, as of right now.</p></div>
+      </header>
 
-      <h2>Building</h2>
-      <p>Agent tooling — orchestration with human checkpoints, and the evaluation pipeline that keeps it honest. Most recently a semantic caching layer that answers near-duplicate prompts from a vector cache instead of paying for the model call twice.</p>
-
-      <h2>Studying</h2>
-      <p>The MSc in Advanced Computer Science with AI at Strathclyde is done — awarded 2025. Since then, a structured AI engineering course focused on retrieval, agents and evals.</p>
-
-      <h2>Open to</h2>
-      <p>AI engineering roles and freelance work. If it involves retrieval, agents, evaluation, or making a model usable by people who didn't build it — I'm interested.</p>
+      <div class="set-list">
+        <div class="set-row tall"><div><b>Building</b><p>Agent tooling — orchestration with human checkpoints, and the evaluation pipeline that keeps it honest. Most recently a semantic caching layer that answers near-duplicate prompts from a vector cache instead of paying for the model call twice.</p></div></div>
+        <div class="set-row tall"><div><b>Studying</b><p>The MSc in Advanced Computer Science with AI at Strathclyde is done — awarded 2025. Since then, a structured AI engineering course focused on retrieval, agents and evals.</p></div></div>
+        <div class="set-row tall"><div><b>Open to</b><p>AI engineering roles and freelance work. If it involves retrieval, agents, evaluation, or making a model usable by people who didn't build it — I'm interested.</p></div></div>
+      </div>
 
       <div class="btn-row">
         <button class="btn primary" data-open="contact">Start a conversation</button>
@@ -518,12 +567,12 @@
   </div>
 </template>
 
-<script type="module" src="js/hello.js?v=5"></script>
-<script type="module" src="js/desktop.js?v=5"></script>
+<script type="module" src="js/hello.js?v=6"></script>
+<script type="module" src="js/desktop.js?v=6"></script>
 <script src="js/visit-log.js?v=6"></script>
-<script type="module" src="js/statusbar.js?v=5"></script>
-<script type="module" src="js/terminal.js?v=5"></script>
-<script type="module" src="js/ari/ari.js?v=5"></script>
-<script type="module" src="js/ari/peek.js?v=5"></script>
+<script type="module" src="js/statusbar.js?v=6"></script>
+<script type="module" src="js/terminal.js?v=6"></script>
+<script type="module" src="js/ari/ari.js?v=6"></script>
+<script type="module" src="js/ari/peek.js?v=6"></script>
 </body>
 </html>

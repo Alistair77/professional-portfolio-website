@@ -1,11 +1,9 @@
 /* Phone layout. Loaded last so it wins ties; every rule is inside a
-   max-width breakpoint, so the desktop layout is never affected. */
+   max-width breakpoint, so the desktop layout is never affected.
+   On a phone the desktop behaves like a phone: one app at a time, full
+   screen under the status bar, a Back button instead of traffic lights,
+   and the dock floating over the bottom like a home-screen dock. */
 
-/* ═══════════════════════════════════════════════════════════════
-   PHONE LAYOUT
-   Everything below is inside the mobile breakpoint, so the desktop
-   layout is untouched. window.css loads last, so these win ties.
-   ═══════════════════════════════════════════════════════════════ */
 @media (max-width: 760px) {
   /* Scale the whole system up. Desktop sizes assume a pointer and a
      viewing distance of ~60cm; a phone is held at ~30cm and tapped with
@@ -16,23 +14,26 @@
     --text-base: 16px;
     --text-lg: 19px;
     --text-title: clamp(1.85rem, 1.4rem + 4vw, 2.4rem);
-    --menubar-h: 46px;
+    --menubar-h: calc(44px + env(safe-area-inset-top, 0px));
     --dock-icon: 52px;
+    --dock-zone: calc(86px + env(safe-area-inset-bottom, 0px)); /* how much of each app the dock floats over */
   }
 
-  /* ---------- menu bar ---------- */
-  .menubar { padding: 0 8px; gap: 0; }
+  /* ---------- status bar: a phone's, not a Mac's ---------- */
+  .menubar { padding: env(safe-area-inset-top, 0px) 8px 0; gap: 0; }
   .mb-item { padding: 7px 6px; }
-  /* the status icons keep their 36px targets; on the narrowest phones the name gives way */
-  .mb-item.is-app { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
   .mb-mark { font-size: 16px; }
-  .mb-icon { width: 36px; height: 36px; }
-  .mb-chev { width: 26px; }
-  .mb-right { gap: 3px; }
-  .mb-clock { font-size: var(--text-sm); }
+  .mb-icon { width: 38px; height: 38px; }
+
+  /* only what a phone shows up there: the time, network, battery — plus music and Ari */
+  .menubar .is-app, #wx-btn, #ari-mic, #ari-sound, #music-toggle { display: none; }
+  .menubar .mb-batt { display: block; margin: 0 5px; }
+  .mb-right { flex: 1 1 auto; justify-content: flex-end; gap: 2px; }
+  .mb-clock { order: -1; margin-right: auto; padding-left: 4px; font-size: 15px; font-weight: 600; font-variant-numeric: tabular-nums; }
 
   /* ---------- dock: scrolls rather than shrinking ---------- */
   .dock {
+    bottom: calc(8px + env(safe-area-inset-bottom, 0px));
     gap: 8px;
     padding: 8px 12px 12px;
     max-width: calc(100vw - 12px);
@@ -40,7 +41,7 @@
     overflow-y: hidden;
     scrollbar-width: none;
     justify-content: flex-start;
-    border-radius: 20px;
+    border-radius: 22px;
   }
 
   .dock::-webkit-scrollbar { display: none; }
@@ -55,14 +56,22 @@
   /* no grey/blue flash box on every tap */
   html { -webkit-tap-highlight-color: transparent; }
 
-  /* ---------- windows ---------- */
+  /* ---------- apps open full screen, edge to edge under the status bar ---------- */
   .window {
-    width: calc(100vw - 12px) !important;
-    height: calc(100vh - var(--menubar-h) - 108px) !important;
-    left: 6px !important;
-    top: calc(var(--menubar-h) + 8px) !important;
-    border-radius: 14px;
+    top: var(--menubar-h) !important;
+    left: 0 !important;
+    width: 100vw !important;
+    height: calc(100vh - var(--menubar-h)) !important;
+    height: calc(100dvh - var(--menubar-h)) !important; /* the visible height, browser bars excluded */
+    max-width: none;
+    max-height: none;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
   }
+
+  /* the dock floats over the bottom of every app, so content stops above it */
+  .win-body { padding-bottom: var(--dock-zone); }
 
   /* Desktop leans on backdrop-filter for legibility (surfaces are 62-74%
      opaque). On a phone, re-blurring the wallpaper under the menu bar and
@@ -73,12 +82,11 @@
     -webkit-backdrop-filter: none;
   }
 
-  .window { background: rgba(28, 30, 37, 0.97); }
+  .window { background: rgba(20, 21, 27, 0.995); }
   .content { background: rgba(20, 21, 27, 0.99); }
-  .sidebar { background: rgba(44, 46, 55, 0.99); }
-  .titlebar { background: rgba(56, 58, 68, 0.99); }
-  .menubar { background: rgba(14, 16, 23, 0.92); }
-  .dock { background: rgba(48, 50, 60, 0.86); }
+  .sidebar { background: rgba(36, 38, 46, 0.99); }
+  .menubar { background: rgba(10, 11, 16, 0.94); }
+  .dock { background: rgba(48, 50, 60, 0.9); }
   .popover, .mb-menu { background: rgba(26, 28, 34, 0.98); }
 
   /* The wallpaper holds still too: its endless motions kept huge GPU layers
@@ -86,16 +94,41 @@
   .wall-bloom, .wall-bloom.b2, .wall-arcs, .wall-dust, .arc-glow use { animation: none; will-change: auto; }
   .arc-glow { display: none; }
 
-  .titlebar { height: 48px; padding: 0 14px; }
-  .title { font-size: var(--text-base); }
+  /* ---------- the title bar becomes a phone nav bar ---------- */
+  .titlebar {
+    height: 52px;
+    padding: 0 6px;
+    background: rgba(24, 25, 32, 0.99);
+    box-shadow: inset 0 -1px 0 var(--hair);
+    touch-action: manipulation;
+  }
 
-  /* traffic lights are 12px on desktop — far too small for a fingertip */
-  .traffic { gap: 12px; }
-  .traffic button { width: 15px; height: 15px; }
-  .traffic button::after { opacity: 1; } /* no hover on touch, so always show */
-  .traffic .tl-close::after { content: "\00d7"; font-size: 14px; }
-  .traffic .tl-min::after { content: "\2013"; }
-  .traffic .tl-max::after { content: "\2922"; font-size: 9px; }
+  .title { left: 100px; right: 100px; font-size: 17px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .traffic { display: none; }
+
+  /* Back: a 44px target, the way a phone does it. At the top of an app it
+     reads Home and closes the app; inside a detail view it reads Back. */
+  .tb-back {
+    position: relative;
+    z-index: 1;
+    display: inline-flex;
+    align-items: center;
+    min-width: 44px;
+    min-height: 44px;
+    padding: 0 12px 0 2px;
+    border: 0;
+    border-radius: 10px;
+    background: none;
+    color: var(--accent);
+    font: inherit;
+    font-size: 17px;
+  }
+
+  .tb-back svg { width: 26px; height: 26px; fill: none; stroke: currentColor; stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; }
+  .tb-back:active { opacity: 0.45; }
+  .tb-back .b-back,
+  .window.in-detail .tb-back .b-home { display: none; }
+  .window.in-detail .tb-back .b-back { display: inline; }
 
   /* ---------- tap targets: 44px minimum throughout ---------- */
   .sidebar { padding: 9px 10px; gap: 8px; }
@@ -122,6 +155,62 @@
 
   .btn-row { gap: 10px; }
   .btn-row .btn { flex: 1 1 auto; }
+
+  /* ---------- About: a phone's Settings — the list first, then the page ---------- */
+  .window[data-nav="list"] .win-body { flex-direction: column; }
+
+  .window[data-nav="list"] .sidebar {
+    flex: 1 1 auto;
+    display: block;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: 14px 16px 24px;
+    background: rgba(13, 14, 19, 0.995);
+    box-shadow: none;
+  }
+
+  .window[data-nav="list"] .content { display: none; }
+  .window[data-nav="list"].in-detail .sidebar { display: none; }
+  .window[data-nav="list"].in-detail .content { display: block; flex: 1 1 auto; }
+
+  .set-search { height: 38px; margin: 0 0 16px; border-radius: 10px; }
+  .set-search input { font-size: 16px; } /* under 16px, iOS zooms in on focus */
+
+  .window[data-nav="list"] .sb-item {
+    display: flex;
+    width: 100%;
+    min-height: 52px;
+    padding: 10px 14px;
+    gap: 13px;
+    border-radius: 0;
+    background: none;
+    white-space: normal;
+    font-size: 16px;
+  }
+
+  .window[data-nav="list"] .sb-item[aria-selected="true"] { background: none; color: var(--text); }
+  .window[data-nav="list"] .sb-item:active { background: rgba(255, 255, 255, 0.08); }
+  .window[data-nav="list"] .sb-item::after { content: "›"; margin-left: auto; padding-left: 8px; font-size: 26px; line-height: 1; color: var(--muted-3); }
+  .window[data-nav="list"] .si { width: 30px; height: 30px; border-radius: 7px; }
+  .window[data-nav="list"] .si svg { width: 19px; height: 19px; }
+
+  .window[data-nav="list"] .set-me,
+  .window[data-nav="list"] .set-group { border-radius: 13px; background: rgba(255, 255, 255, 0.07); overflow: hidden; }
+  .window[data-nav="list"] .set-me { padding: 14px; gap: 14px; }
+  .window[data-nav="list"] .set-me small { color: var(--muted-2); }
+  .window[data-nav="list"] .set-group { margin-top: 22px; }
+  .set-group .sb-item + .sb-item { box-shadow: inset 0 1px 0 var(--hair); }
+  .set-me img { width: 62px; height: 62px; }
+  .set-me b { font-size: 19px; }
+  .set-me small { font-size: 14px; }
+
+  .set-content { padding: 18px 16px 30px; }
+  .set-content .pane { max-width: none; }
+  .set-row { min-height: 50px; padding: 10px 14px; font-size: 16px; }
+  .set-row.tall p { font-size: 15px; }
+  .set-label { margin: 24px 6px 8px; font-size: 14px; }
+  .me-hero { padding-top: 14px; }
 
   /* project cards */
   .pcard {
@@ -177,21 +266,17 @@
   .pdfbar-actions .btn { width: 100%; }
 
   /* terminal */
-  .terminal { padding: 16px 14px; font-size: 12px; line-height: 1.65; }
+  .terminal { padding: 14px 12px; font-size: 12px; line-height: 1.65; }
+  .term-ps { font-size: 11px; }
+  .term-in { font-size: 16px; } /* < 16px makes iOS zoom on focus */
 
-  /* popovers sit under a 46px bar now */
+  /* popovers sit under the taller status bar */
   .popover { width: min(280px, calc(100vw - 16px)); }
   .track { min-height: 44px; }
 }
 
-/* very small phones: keep the dock from crowding the window */
+/* very small phones: smaller dock icons so the dock crowds less */
 @media (max-width: 380px) {
   :root { --dock-icon: 48px; }
-  .window { height: calc(100vh - var(--menubar-h) - 100px) !important; }
-}
-
-@media (max-width: 760px) {
-  .terminal { padding: 14px 12px; font-size: 12px; }
-  .term-ps { font-size: 11px; }
-  .term-in { font-size: 16px; } /* < 16px makes iOS zoom on focus */
+  .title { left: 92px; right: 92px; }
 }

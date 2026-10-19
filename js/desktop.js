@@ -1,7 +1,9 @@
 /* Desktop shell: clock, menu bar menus, dock magnification + state, terminal. */
 
-import { openApp, closeApp, isOpen } from "./wm.js?v=5";
-import { renderProjects } from "./projects.js?v=5";
+import { openApp, closeApp, isOpen } from "./wm.js?v=6";
+import { renderProjects } from "./projects.js?v=6";
+
+const PHONE = matchMedia("(max-width: 760px)");
 
 /* ---------- clock ---------- */
 /* date and time are separate so phones can show the time alone, as a phone does */
@@ -138,6 +140,33 @@ document.addEventListener("click", (e) => {
   body.querySelectorAll(".sb-item").forEach((b) => b.setAttribute("aria-selected", String(b === tab)));
   body.querySelectorAll(".pane").forEach((p) => (p.hidden = p.dataset.pane !== tab.dataset.pane));
   body.querySelector(".content").scrollTop = 0;
+  /* phones push a detail view like a phone app: list windows (About) on any
+     item, the rest when leaving their first pane. Back (wm.js) pops it. */
+  const win = tab.closest(".window");
+  if (win && PHONE.matches) {
+    win.classList.toggle("in-detail", win.dataset.nav === "list" || tab !== body.querySelector(".sb-item"));
+  }
+});
+
+/* About's search field filters the sidebar by name or by what a pane says */
+document.addEventListener("input", (e) => {
+  const box = e.target.closest?.(".set-search input");
+  if (!box) return;
+  const q = box.value.trim().toLowerCase();
+  const side = box.closest(".sidebar");
+  const body = box.closest(".win-body");
+  for (const item of side.querySelectorAll(".sb-item")) {
+    const pane = body.querySelector(`.pane[data-pane="${item.dataset.pane}"]`);
+    item.hidden = !!q && !`${item.textContent} ${pane?.textContent || ""}`.toLowerCase().includes(q);
+  }
+  for (const group of side.querySelectorAll(".set-group")) group.hidden = !group.querySelector(".sb-item:not([hidden])");
+});
+
+/* Enter opens the first match */
+document.addEventListener("keydown", (e) => {
+  if (e.key !== "Enter" || !e.target.closest?.(".set-search input")) return;
+  e.preventDefault();
+  e.target.closest(".sidebar").querySelector(".sb-item:not([hidden])")?.click();
 });
 
 /* project rows jump to the project pane */

@@ -2,13 +2,13 @@
    data-app="ari">), talks in scripted lines, points at the Projects window,
    and explains whichever project the visitor picks there. */
 
-import { openApp, focusWindow, besideAri, resetSize } from "../wm.js?v=5";
-import { createFigure } from "./figure.js?v=5";
-import { voice } from "./voice.js?v=5";
-import { decide } from "./decide.js?v=5";
-import { micSupported, listenOnce, stopListening } from "./mic.js?v=5";
-import { LINES, CHIPS, LABEL, LINKS, PANE, PANE_NODE, MORE, greeting, GITHUB, LINKEDIN } from "./lines.js?v=5";
-import { PROJECTS } from "../projects.js?v=5";
+import { openApp, focusWindow, besideAri, resetSize } from "../wm.js?v=6";
+import { createFigure } from "./figure.js?v=6";
+import { voice } from "./voice.js?v=6";
+import { decide } from "./decide.js?v=6";
+import { micSupported, listenOnce, stopListening } from "./mic.js?v=6";
+import { LINES, CHIPS, LABEL, LINKS, PANE, PANE_NODE, MORE, greeting, GITHUB, LINKEDIN } from "./lines.js?v=6";
+import { PROJECTS } from "../projects.js?v=6";
 
 const RM = matchMedia("(prefers-reduced-motion: reduce)").matches;
 const clamp = (v, a = -1, b = 1) => Math.max(a, Math.min(b, v));
@@ -66,7 +66,7 @@ const HALF_GAP = 16; // matches wm.js: windows never touch chrome or each other
 /* equal split: Ari gives up its stage width so both windows share 50-50.
    Falls back to the narrow beside-list when the screen is too small. */
 function openHalf(id) {
-  const el = openApp(id);
+  const el = openApp(id, { join: true });
   if (!el || !win || PHONE.matches) return el;
   const half = Math.floor((innerWidth - HALF_GAP * 3) / 2);
   if (half < 340 || win.hidden) {
@@ -179,7 +179,7 @@ function say(text, chips) {
 /* open the real Projects window beside Ari (never over it), at the right pane */
 function showProject(pane) {
   if (PHONE.matches) { showStrip(pane); return; } // a phone window would cover Ari
-  const pw = openApp("projects");
+  const pw = openApp("projects", { join: true });
   if (!pw) return;
   if (pane) {
     selfNav = true;

@@ -18,8 +18,45 @@
   -webkit-backdrop-filter: var(--blur-chrome);
   border: 1px solid var(--hair);
   box-shadow: var(--shadow-win);
-  animation: winIn var(--dur-win) var(--ease) both;
+  /* backwards, not both: a forwards fill would pin transform and block Stage Manager */
+  animation: winIn var(--dur-win) var(--ease) backwards;
+  transition: transform 480ms var(--ease-snap), opacity 260ms var(--ease), filter var(--dur-fast) var(--ease);
   will-change: transform;
+}
+
+/* ---------- Stage Manager ----------
+   A staged window is the real window, scaled into the strip on the left and
+   tilted back a little; wm.js sets --stage per window. */
+.window.staged {
+  animation: none;
+  transform-origin: 0 0;
+  transform: var(--stage) perspective(1400px) rotateY(18deg);
+  cursor: pointer;
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.55);
+}
+
+.window.staged > * { pointer-events: none; }
+.window.staged:hover { filter: brightness(1.14); }
+.window.staged:focus-visible { outline: 14px solid var(--accent); outline-offset: 8px; }
+.window.stage-spill { opacity: 0; pointer-events: none; }
+.window.staged.closing { animation: none; opacity: 0; }
+
+/* a stage window over the strip tucks it away; the left edge brings it back */
+#windows.strip-covered .window.staged {
+  transform: translateX(-240px) var(--stage) perspective(1400px) rotateY(18deg);
+  opacity: 0;
+}
+
+#windows.strip-covered.strip-peek .window.staged {
+  z-index: 9000 !important;
+  transform: var(--stage) perspective(1400px) rotateY(18deg);
+  opacity: 1;
+}
+
+#windows.strip-covered.strip-peek .window.stage-spill { opacity: 0; }
+
+@media (prefers-reduced-motion: reduce) {
+  .window { transition: none; }
 }
 
 @keyframes winIn {
@@ -91,6 +128,9 @@
 .traffic .tl-close { background: var(--tl-red); }
 .traffic .tl-min { background: var(--tl-yellow); }
 .traffic .tl-max { background: var(--tl-green); }
+
+/* the phone layout's Back button (mobile.css); desktop windows keep the lights */
+.tb-back { display: none; }
 
 /* glyphs only appear when the cluster is hovered — same as the real thing */
 .traffic button::after {

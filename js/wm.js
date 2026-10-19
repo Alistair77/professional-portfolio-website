@@ -12,46 +12,69 @@ const GAP = 16;
 const MIN_ROOM = 520; // narrower than this beside Ari, and zoom just goes full screen
 const MIN_LIST = 200; // narrower than this, and a window opened beside Ari opens as usual
 const RM = matchMedia("(prefers-reduced-motion: reduce)").matches;
-const isTouchLayout = () => window.matchMedia("(max-width: 760px)").matches;
+const PHONE = matchMedia("(max-width: 760px)");
+const isTouchLayout = () => PHONE.matches;
 
 export function isOpen(id) {
   return open.has(id);
 }
 
 export function focusWindow(el) {
-  if (el.dataset.z == zTop) return;
-  el.style.zIndex = el.dataset.z = ++zTop;
-  for (const w of open.values()) w.classList.toggle("focused", w === el);
-  document.dispatchEvent(new CustomEvent("app:focus", { detail: el.dataset.app }));
+  if (staged(el)) return present(el);
+  raise(el);
 }
 
-export function openApp(id) {
+function raise(el) {
+  const changed = el.dataset.z != zTop;
+  if (changed) el.style.zIndex = el.dataset.z = ++zTop;
+  for (const w of open.values()) w.classList.toggle("focused", w === el);
+  if (changed) document.dispatchEvent(new CustomEvent("app:focus", { detail: el.dataset.app }));
+}
+
+/* `join`: the window joins the set on stage (how Ari opens things beside
+   itself) instead of sending that set to the strip */
+export function openApp(id, { join = false } = {}) {
   const existing = open.get(id);
   if (existing) {
-    if (existing.hidden) restore(existing);
-    focusWindow(existing);
+    if (isTouchLayout()) return switchTo(existing), existing;
+    const lead = front();
+    if (join && lead && lead !== existing) existing.dataset.group = lead.dataset.group; // moves into Ari's set
+    if (staged(existing) || existing.hidden) present(existing);
+    else raise(existing);
     return existing;
   }
 
   const tpl = document.querySelector(`template[data-app="${id}"]`);
   if (!tpl) return null;
 
+  const title = tpl.dataset.title || id;
   const el = document.createElement("section");
   el.className = "window focused";
   el.dataset.app = id;
+  el.dataset.title = title;
+  if (tpl.dataset.nav) el.dataset.nav = tpl.dataset.nav;
   el.setAttribute("role", "dialog");
-  el.setAttribute("aria-label", tpl.dataset.title || id);
-  el.innerHTML = chrome(tpl.dataset.title || id) ;
+  el.setAttribute("aria-label", title);
+  el.innerHTML = chrome(title);
   el.querySelector(".win-body").append(tpl.content.cloneNode(true));
 
   if (tpl.dataset.width) el.style.width = tpl.dataset.width + "px";
   if (tpl.dataset.height) el.style.height = tpl.dataset.height + "px";
 
+  const lead = front();
+  if (isTouchLayout()) hideOthers(el);
+  else if (join && lead) el.dataset.group = lead.dataset.group;
+  else {
+    el.dataset.group = String(++groupSeq);
+    stageAside(el.dataset.group);
+  }
+
   place(el, tpl);
   layer.append(el);
   open.set(id, el);
   wire(el);
-  focusWindow(el);
+  raise(el);
+  checkCover();
 
   document.dispatchEvent(new CustomEvent("app:open", { detail: id }));
   return el;
@@ -67,6 +90,7 @@ export function closeApp(id) {
   el.addEventListener("animationend", drop, { once: true });
   setTimeout(drop, 400);
   open.delete(id);
+  layoutStrip();
   document.dispatchEvent(new CustomEvent("app:close", { detail: id }));
 }
 
@@ -75,6 +99,10 @@ export function closeApp(id) {
 function chrome(title) {
   return `
     <header class="titlebar">
+      <button class="tb-back" type="button">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>
+        <span class="b-home">Home</span><span class="b-back">Back</span>
+      </button>
       <div class="traffic">
         <button class="tl-close" aria-label="Close window"></button>
         <button class="tl-min" aria-label="Minimize window"></button>
@@ -93,8 +121,10 @@ function place(el, tpl) {
   const maxH = Math.min(h, innerHeight - MENUBAR_H - DOCK_SAFE);
   const step = (cascade++ % 5) * 26;
   const lowest = innerHeight - DOCK_SAFE - maxH; // any lower and the cascade tucks tall windows under the dock
+  const room = strip.length ? STRIP_ROOM : 14; // centre right of the strip while it shows
 
-  el.style.left = Math.max(14, (innerWidth - maxW) / 2 + step - 52) + "px";
+  const ideal = room + (innerWidth - room - 14 - maxW) / 2 + step - 52;
+  el.style.left = Math.max(14, Math.min(innerWidth - maxW - 14, ideal)) + "px";
   el.style.top = Math.max(MENUBAR_H + 12, Math.min(lowest, lowest / 2 + step - 40)) + "px";
 }
 
@@ -103,10 +133,22 @@ function place(el, tpl) {
 function wire(el) {
   const bar = el.querySelector(".titlebar");
 
+  // a thumbnail in the strip is one big button: the click swaps it back on stage
+  el.addEventListener("pointerdown", (e) => {
+    if (!staged(el)) return;
+    e.stopImmediatePropagation();
+    e.preventDefault();
+    present(el);
+  }, true);
+  el.addEventListener("keydown", (e) => {
+    if (staged(el) && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); present(el); }
+  });
+
   el.addEventListener("pointerdown", () => focusWindow(el), true);
   el.querySelector(".tl-close").addEventListener("click", () => closeApp(el.dataset.app));
   el.querySelector(".tl-min").addEventListener("click", () => minimize(el));
   el.querySelector(".tl-max").addEventListener("click", () => toggleZoom(el));
+  el.querySelector(".tb-back").addEventListener("click", () => back(el));
   bar.addEventListener("dblclick", (e) => {
     if (!e.target.closest(".traffic")) toggleZoom(el);
   });
@@ -114,6 +156,14 @@ function wire(el) {
   if (isTouchLayout()) return; // no dragging or resizing on phones
   drag(bar, el);
   resize(el.querySelector(".grip"), el);
+}
+
+/* phones: Back leaves a detail view; at the top level it closes the app,
+   which lands on the home screen like any phone app */
+function back(el) {
+  if (!el.classList.contains("in-detail")) return closeApp(el.dataset.app);
+  el.classList.remove("in-detail");
+  if (el.dataset.nav !== "list") el.querySelector(".sb-item")?.click(); // back to the first pane
 }
 
 function drag(handle, el) {
@@ -131,6 +181,7 @@ function drag(handle, el) {
     const up = () => {
       handle.removeEventListener("pointermove", move);
       handle.removeEventListener("pointerup", up);
+      checkCover();
     };
     handle.addEventListener("pointermove", move);
     handle.addEventListener("pointerup", up);
@@ -154,6 +205,7 @@ function resize(grip, el) {
     const up = () => {
       grip.removeEventListener("pointermove", move);
       grip.removeEventListener("pointerup", up);
+      checkCover();
     };
     grip.addEventListener("pointermove", move);
     grip.addEventListener("pointerup", up);
@@ -165,6 +217,7 @@ function minimize(el) {
   el.addEventListener("animationend", () => {
     el.hidden = true;
     el.classList.remove("minimized");
+    checkCover();
   }, { once: true });
 }
 
@@ -194,8 +247,119 @@ function toggleZoom(el) {
     const p = JSON.parse(el.dataset.prev || "{}");
     Object.assign(el.style, { ...p, maxWidth: "", maxHeight: "" });
   }
+  checkCover();
   document.dispatchEvent(new CustomEvent("app:zoom", { detail: { id: el.dataset.app, on } }));
 }
+
+/* ---------- Stage Manager ----------
+   One set of windows is on stage. Opening another app slides that set into a
+   strip of live thumbnails down the left edge; clicking a thumbnail swaps it
+   back. Windows Ari opens beside itself join its set. Off on phones, where
+   one app fills the screen at a time. */
+
+const STRIP_X = 20; // thumbnails' left edge
+const STRIP_W = 150; // a thumbnail's width budget
+const SLOT_H = 112; // vertical pitch per set
+const STRIP_ROOM = STRIP_X + STRIP_W + 30; // windows start right of this while the strip shows
+let strip = []; // staged sets, newest first, as group ids
+let groupSeq = 0;
+
+const staged = (w) => w.classList.contains("staged");
+const onStage = () => [...open.values()].filter((w) => !w.hidden && !staged(w));
+const members = (g) => [...open.values()].filter((w) => w.dataset.group === g);
+const front = () => onStage().reduce((a, b) => (!a || +b.dataset.z > +a.dataset.z ? b : a), null);
+
+/* everything on stage except group `keep` slides into the strip */
+function stageAside(keep) {
+  for (const w of onStage()) {
+    if (w.dataset.group === keep) continue;
+    w.classList.add("staged");
+    w.classList.remove("focused", "minimized");
+    w.setAttribute("role", "button");
+    w.setAttribute("aria-label", `Show ${w.dataset.title}`);
+    w.tabIndex = 0;
+    strip = [w.dataset.group, ...strip.filter((g) => g !== w.dataset.group)];
+  }
+  layoutStrip();
+}
+
+/* bring a staged or minimised window — with the rest of its set — on stage */
+function present(el) {
+  const g = el.dataset.group;
+  stageAside(g);
+  strip = strip.filter((x) => x !== g);
+  const set = members(g);
+  for (const w of set) {
+    if (w.hidden) restore(w);
+    w.classList.remove("staged");
+    w.setAttribute("role", "dialog");
+    w.setAttribute("aria-label", w.dataset.title);
+    w.removeAttribute("tabindex");
+    w.style.zIndex = w.dataset.z;
+  }
+  for (const w of set) if (w !== el) raise(w);
+  raise(el);
+  layoutStrip();
+}
+
+function layoutStrip() {
+  strip = strip.filter((g) => members(g).length);
+  const top = MENUBAR_H + 64;
+  const slots = Math.max(1, Math.floor((innerHeight - top - DOCK_SAFE) / SLOT_H));
+  strip.forEach((g, i) => {
+    members(g).forEach((w, j) => {
+      const s = Math.min(STRIP_W / w.offsetWidth, (SLOT_H - 24) / w.offsetHeight);
+      const x = STRIP_X + j * 12;
+      const y = top + i * SLOT_H + j * 8;
+      w.style.setProperty("--stage", `translate(${x - w.offsetLeft}px, ${y - w.offsetTop}px) scale(${s.toFixed(4)})`);
+      w.style.zIndex = 10 - i; // under the stage, newest set on top
+      w.classList.toggle("stage-spill", i >= slots);
+    });
+  });
+  checkCover();
+}
+
+/* a window over the strip hides it, as on a Mac; the left edge brings it back */
+function checkCover() {
+  const covered = strip.length > 0 && onStage().some((w) => w.offsetLeft < STRIP_ROOM - 10);
+  layer.classList.toggle("strip-covered", covered);
+  if (!covered) layer.classList.remove("strip-peek");
+}
+
+addEventListener("pointermove", (e) => {
+  if (!layer.classList.contains("strip-covered")) return;
+  const peeking = layer.classList.contains("strip-peek");
+  if (!peeking && e.clientX < 12) layer.classList.add("strip-peek");
+  else if (peeking && e.clientX > STRIP_ROOM + 24) layer.classList.remove("strip-peek");
+}, { passive: true });
+
+addEventListener("resize", () => strip.length && layoutStrip());
+
+/* phones show one app at a time: the others wait, hidden, until their dock icon */
+function hideOthers(el) {
+  for (const w of open.values()) if (w !== el) w.hidden = true;
+}
+
+function switchTo(el) {
+  hideOthers(el);
+  if (el.hidden) restore(el);
+  raise(el);
+}
+
+/* crossing onto a phone layout: the strip's sets just become background apps */
+PHONE.addEventListener("change", () => {
+  if (!PHONE.matches) return;
+  for (const w of open.values()) {
+    if (!staged(w)) continue;
+    w.classList.remove("staged");
+    w.setAttribute("role", "dialog");
+    w.setAttribute("aria-label", w.dataset.title);
+    w.removeAttribute("tabindex");
+    w.hidden = true;
+  }
+  strip = [];
+  checkCover();
+});
 
 /* ---------- Ari stays in view ----------
    Ari is a companion, so other windows make room for it instead of covering
@@ -219,7 +383,7 @@ function slide(el, left, top) {
 /* the visible Ari window, or null on phones (windows stack full screen there) */
 function companion(el) {
   const ari = open.get("ari");
-  return ari && ari !== el && !ari.hidden && !isTouchLayout() ? ari : null;
+  return ari && ari !== el && !ari.hidden && !staged(ari) && !isTouchLayout() ? ari : null;
 }
 
 /* where Ari's left edge sits when docked right */
@@ -265,6 +429,7 @@ export function besideAri(el, width) {
     maxWidth: "",
     maxHeight: "",
   });
+  checkCover();
   return true;
 }
 
@@ -274,11 +439,12 @@ export function resetSize(el) {
   Object.assign(el.style, { width: width + "px", height: height + "px" });
   el.style.left = Math.max(14, Math.min(el.offsetLeft, innerWidth - el.offsetWidth - 14)) + "px";
   el.style.top = Math.max(MENUBAR_H + 12, Math.min(el.offsetTop, innerHeight - DOCK_SAFE - el.offsetHeight)) + "px";
+  checkCover();
 }
 
 /* Escape closes the front window — cheap keyboard exit. */
 addEventListener("keydown", (e) => {
-  if (e.key !== "Escape" || !open.size) return;
-  const front = [...open.values()].reduce((a, b) => (+a.dataset.z > +b.dataset.z ? a : b));
-  closeApp(front.dataset.app);
+  if (e.key !== "Escape") return;
+  const f = front();
+  if (f) closeApp(f.dataset.app);
 });
